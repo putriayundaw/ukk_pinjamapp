@@ -1,6 +1,7 @@
 // main.dart
 
 import 'package:aplikasi_pinjam_ukk/controller/auth_controller.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/dashboard/dashboard_admin.dart';
 import 'package:aplikasi_pinjam_ukk/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      home: SplashScreen(),
+      home: DashboardAdmin(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         inputDecorationTheme: InputDecorationTheme(

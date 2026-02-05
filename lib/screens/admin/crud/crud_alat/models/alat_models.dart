@@ -1,5 +1,4 @@
-// lib/screens/admin/crud/crud_alat/models/alat_models.dart
-
+// models/alat_model.dart
 class Alat {
   final int alatId;
   final String namaAlat;
@@ -19,7 +18,7 @@ class Alat {
     this.imageUrl,
   });
 
-  // Fungsi untuk konversi dari JSON ke objek Alat
+  // Factory method untuk memparsing JSON menjadi objek Alat
   factory Alat.fromJson(Map<String, dynamic> json) {
     return Alat(
       alatId: json['alat_id'],
@@ -30,5 +29,18 @@ class Alat {
       createAt: json['create_at'],
       imageUrl: json['image_url'],
     );
+  }
+
+  // Method untuk mengkonversi objek Alat menjadi JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'alat_id': alatId,
+      'nama_alat': namaAlat,
+      'kategori_id': kategoriId,
+      'stok': stok,
+      'status': status,
+      'create_at': createAt,
+      'image_url': imageUrl,
+    };
   }
 }

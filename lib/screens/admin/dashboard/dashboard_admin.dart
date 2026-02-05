@@ -1,3 +1,4 @@
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/alat_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/user_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/settings/settings_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/widgets/navbar_admin.dart';
@@ -19,7 +20,7 @@ class _DashboardAdminState extends State<DashboardAdmin> {
   final List<Widget> _pages = [
     const Center(child: Text('semangat coooyy')),
     const UserScreen(),
-    const SettingsScreen(),
+     AlatScreen(),
         const SettingsScreen(),
     const SettingsScreen(),
   ];
