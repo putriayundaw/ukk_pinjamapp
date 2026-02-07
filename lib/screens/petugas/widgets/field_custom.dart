@@ -17,7 +17,7 @@ class CustomInputField extends StatelessWidget {
   final bool autoFocus;
 
   const CustomInputField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.label,
     required this.hintText,
@@ -29,7 +29,7 @@ class CustomInputField extends StatelessWidget {
     this.keyboardType,
     this.suffixIcon,
     this.autoFocus = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +96,7 @@ class CustomInputField extends StatelessWidget {
               vertical: 14,
             ),
           ),
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black,
             fontSize: 16,
           ),

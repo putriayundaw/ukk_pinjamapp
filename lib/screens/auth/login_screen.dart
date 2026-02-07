@@ -60,8 +60,8 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: Sizes.xxl),
-              Text(
+              const SizedBox(height: Sizes.xxl),
+              const Text(
                 'CasHieR',
                 style: TextStyle(
                   color: AppColors.Blue,
@@ -140,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         elevation: 0,
                       ),
                       child: authController.isLoading.value
-                        ? SizedBox(
+                        ? const SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
@@ -161,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 );
               }),
               
-              SizedBox(height: Sizes.xxl),
+              const SizedBox(height: Sizes.xxl),
             ],
           ),
         ),

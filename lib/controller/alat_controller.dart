@@ -1,94 +1,90 @@
-import 'dart:convert';
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/models/alat_models.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AlatController extends GetxController {
-  // Daftar alat yang akan ditampilkan
-  var alatList = <Alat>[].obs;
-  var isLoading = true.obs; // Flag untuk menampilkan indikator loading
+  final supabase = Supabase.instance.client;
 
-  // Inisialisasi Supabase Client
-  final SupabaseClient supabase = Supabase.instance.client;
+  final alatList = <AlatModel>[].obs;
+  final filteredAlatList = <AlatModel>[].obs;
 
-  // Mengambil data alat dari Supabase
-  Future<void> loadAlat() async {
-     {
-      isLoading(true);
+  final isLoading = false.obs;
 
-      // Query untuk mengambil data dari tabel "alat"
-      final response = await supabase
-          .from('alat') // Nama tabel di Supabase
-          .select() // Pilih semua data dari tabel
-          ; // Supabase query tanpa execute() di versi terbaru
-
-     
-
-     
-      
-      }
+  @override
+  void onInit() {
+    super.onInit();
+    fetchAlat();
   }
 
-  // Menambahkan alat ke Supabase
-  Future<void> addAlat(Alat alat) async {
+  // ================= GET =================
+  Future<void> fetchAlat() async {
     try {
+      isLoading.value = true;
+
       final response = await supabase
-          .from('alat') // Nama tabel di Supabase
-          .insert(alat.toJson()) // Mengirim data alat baru ke Supabase
-          ; // Jangan gunakan execute() lagi di versi terbaru
+          .from('alat')
+          .select()
+          .order('created_at', ascending: false);
 
-      if (response.error != null) {
-        print('Error adding alat: ${response.error!.message}');
-        throw Exception('Gagal menambahkan alat: ${response.error!.message}');
-      }
+      final data = response as List;
 
-      alatList.add(alat); // Menambahkan alat ke dalam list lokal
+      alatList.value = data.map((e) => AlatModel.fromJson(e)).toList();
+
+      filteredAlatList.assignAll(alatList);
     } catch (e) {
-      print('Error adding alat: $e');
+      Get.snackbar('Error', 'Gagal mengambil data alat');
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  // Mengupdate alat di Supabase
-  Future<void> updateAlat(Alat alat) async {
-    try {
-      final response = await supabase
-          .from('alat') // Nama tabel di Supabase
-          .update(alat.toJson()) // Mengupdate data alat
-          .eq('alat_id', alat.alatId) ;// Menentukan ID alat yang ingin diupdate
-           // Jangan gunakan execute() lagi di versi terbaru
-
-      if (response.error != null) {
-        print('Error updating alat: ${response.error!.message}');
-        throw Exception('Gagal mengupdate alat: ${response.error!.message}');
-      }
-
-      // Menemukan indeks alat yang sudah diupdate dan menggantinya dengan data baru
-      var index = alatList.indexWhere((item) => item.alatId == alat.alatId);
-      if (index != -1) {
-        alatList[index] = alat;
-      }
-    } catch (e) {
-      print('Error updating alat: $e');
+  // ================= FILTER =================
+  void filterByKategori(int kategoriId) {
+    if (kategoriId == 0) {
+      filteredAlatList.assignAll(alatList);
+    } else {
+      filteredAlatList.assignAll(
+        alatList.where((e) => e.kategoriId == kategoriId).toList(),
+      );
     }
   }
 
-  // Menghapus alat dari Supabase
+  // ================= CREATE =================
+  Future<void> createAlat(AlatModel alat) async {
+    try {
+      await supabase.from('alat').insert(alat.toJson());
+      fetchAlat();
+      Get.back();
+      Get.snackbar('Sukses', 'Alat berhasil ditambahkan');
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal menambahkan alat');
+    }
+  }
+
+  // ================= UPDATE =================
+  Future<void> updateAlat(AlatModel alat) async {
+    try {
+      await supabase
+          .from('alat')
+          .update(alat.toJson())
+          .eq('alat_id', alat.alatId!); // 👈 FIX DI SINI
+
+      fetchAlat();
+      Get.back();
+      Get.snackbar('Sukses', 'Alat berhasil diperbarui');
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal update alat');
+    }
+  }
+
+  // ================= DELETE =================
   Future<void> deleteAlat(int alatId) async {
     try {
-      final response = await supabase
-          .from('alat') // Nama tabel di Supabase
-          .delete() // Menghapus data
-          .eq('alat_id', alatId) // Menentukan ID alat yang ingin dihapus
-          ; // Jangan gunakan execute() lagi di versi terbaru
-
-      if (response.error != null) {
-        print('Error deleting alat: ${response.error!.message}');
-        throw Exception('Gagal menghapus alat: ${response.error!.message}');
-      }
-
-      alatList.removeWhere((item) => item.alatId == alatId); // Menghapus alat dari list lokal
+      await supabase.from('alat').delete().eq('alat_id', alatId);
+      fetchAlat();
+      Get.snackbar('Sukses', 'Alat berhasil dihapus');
     } catch (e) {
-      print('Error deleting alat: $e');
+      Get.snackbar('Error', 'Gagal menghapus alat');
     }
   }
 }

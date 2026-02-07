@@ -30,12 +30,12 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      home: DashboardAdmin(),
+      home: const DashboardAdmin(),
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         inputDecorationTheme: InputDecorationTheme(
@@ -51,15 +51,15 @@ class MyApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.blue, width: 2),
+            borderSide: const BorderSide(color: Colors.blue, width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.red, width: 1),
+            borderSide: const BorderSide(color: Colors.red, width: 1),
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: Colors.red, width: 2),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
           ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,

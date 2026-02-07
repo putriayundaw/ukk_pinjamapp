@@ -6,26 +6,26 @@ class KategoriButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const KategoriButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.onPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: onPressed,
+      style: TextButton.styleFrom(
+        side: const BorderSide(color: Colors.blue),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
       child: Text(
         label,
         style: const TextStyle(
           color: Colors.blue,
           fontWeight: FontWeight.bold,
-        ),
-      ),
-      style: TextButton.styleFrom(
-        side: const BorderSide(color: Colors.blue),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
         ),
       ),
     );

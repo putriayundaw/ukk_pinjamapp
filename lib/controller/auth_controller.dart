@@ -39,10 +39,10 @@ class AuthController extends GetxController {
         _redirectBasedOnRole(role);
       } else {
         // Jika user tidak ada, arahkan ke login
-        Get.offAll(() => LoginScreen());
+        Get.offAll(() => const LoginScreen());
       }
     } else {
-      Get.offAll(() => LoginScreen());
+      Get.offAll(() => const LoginScreen());
     }
   }
 
@@ -103,7 +103,7 @@ class AuthController extends GetxController {
       } else {
         emailError.value = 'Terjadi kesalahan autentikasi';
       }
-    } on PostgrestException catch (e) {
+    } on PostgrestException {
       emailError.value = 'Terjadi kesalahan sistem';
     } catch (e) {
       emailError.value = 'Terjadi kesalahan. Coba lagi nanti.';
@@ -116,13 +116,13 @@ class AuthController extends GetxController {
   void _redirectBasedOnRole(String role) {
     switch (role) {
       case 'admin':
-        Get.offAll(() => DashboardAdmin());
+        Get.offAll(() => const DashboardAdmin());
         break;
       case 'petugas':
-        Get.offAll(() => DashboardPetugas());
+        Get.offAll(() => const DashboardPetugas());
         break;
       case 'user':
-        Get.offAll(() => DashboardPeminjam());
+        Get.offAll(() => const DashboardPeminjam());
         break;
       default:
         emailError.value = 'Role tidak dikenali';
@@ -139,7 +139,7 @@ class AuthController extends GetxController {
       await prefs.remove('isLoggedIn');
 
       // Redirect ke Login Screen
-      Get.offAll(() => LoginScreen());
+      Get.offAll(() => const LoginScreen());
     } catch (e) {
       emailError.value = 'Gagal logout';
     }

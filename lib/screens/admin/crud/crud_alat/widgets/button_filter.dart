@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class FilterButton extends StatelessWidget {
   final String label;
 
-  const FilterButton({required this.label});
+  const FilterButton({super.key, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -11,12 +11,12 @@ class FilterButton extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: ElevatedButton(
         onPressed: () {},
-        child: Text(label),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
           iconColor: Colors.blue,
-          side: BorderSide(color: Colors.blue),
+          side: const BorderSide(color: Colors.blue),
         ),
+        child: Text(label),
       ),
     );
   }
