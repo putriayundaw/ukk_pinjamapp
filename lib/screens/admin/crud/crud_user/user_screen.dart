@@ -1,7 +1,9 @@
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/create_user.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/update_user.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:aplikasi_pinjam_ukk/controller/user_controller.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/models/users_model.dart';
 import 'widgets/user_role_filter.dart';
 import 'widgets/user_card.dart';
 
@@ -13,7 +15,37 @@ class UserScreen extends StatefulWidget {
 }
 
 class _UserScreenState extends State<UserScreen> {
+  final UserController userController = Get.find<UserController>();
+  final TextEditingController searchController = TextEditingController();
   int selectedRole = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    userController.getUsers();
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  void _confirmDelete(UserModel user) {
+    Get.defaultDialog(
+      title: 'Hapus Pengguna',
+      middleText: 'Apakah Anda yakin ingin menghapus ${user.nama ?? 'pengguna ini'}?',
+      textConfirm: 'Hapus',
+      textCancel: 'Batal',
+      confirmTextColor: Colors.white,
+      onConfirm: () {
+        if (user.id != null) {
+          userController.deleteUser(user.id!);
+        }
+        Get.back();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +89,8 @@ class _UserScreenState extends State<UserScreen> {
 
   Widget _searchField() {
     return TextField(
+      controller: searchController,
+      onChanged: (value) => setState(() {}),
       decoration: InputDecoration(
         hintText: 'Cari pengguna',
         prefixIcon: const Icon(Icons.search),
@@ -71,16 +105,42 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   Widget _userList() {
-    return ListView.builder(
-      itemCount: 6,
-      itemBuilder: (context, index) {
-        return UserCard(
-          name: 'Putri Ayunda',
-          role: selectedRole == 0 ? 'Petugas' : 'Peminjam',
-          onEdit: () {},
-          onDelete: () {},
+    return Obx(() {
+      if (userController.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (userController.errorMessage.isNotEmpty) {
+        return Center(
+          child: Text(
+            userController.errorMessage.value,
+            style: const TextStyle(color: Colors.red),
+          ),
         );
-      },
-    );
+      }
+
+      final filteredUsers = userController.usersList.where((user) {
+        final matchesSearch = (user.nama?.toLowerCase() ?? '').contains(searchController.text.toLowerCase());
+        final matchesRole = selectedRole == 0 || user.role == (selectedRole == 1 ? 'Petugas' : 'Peminjam');
+        return matchesSearch && matchesRole;
+      }).toList();
+
+      if (filteredUsers.isEmpty) {
+        return const Center(child: Text('Tidak ada pengguna ditemukan'));
+      }
+
+      return ListView.builder(
+        itemCount: filteredUsers.length,
+        itemBuilder: (context, index) {
+          final user = filteredUsers[index];
+          return UserCard(
+            key: ValueKey(user.id ?? index),
+            user: user,
+            onEdit: () => Get.to(() => UpdateUser(user: user)),
+            onDelete: () => _confirmDelete(user),
+          );
+        },
+      );
+    });
   }
 }

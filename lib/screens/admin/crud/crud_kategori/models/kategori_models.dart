@@ -1,14 +1,11 @@
-class KategoriModel {
+class Kategori {
   final int kategoriId;
   final String namaKategori;
 
-  KategoriModel({
-    required this.kategoriId,
-    required this.namaKategori,
-  });
+  Kategori({required this.kategoriId, required this.namaKategori});
 
-  factory KategoriModel.fromJson(Map<String, dynamic> json) {
-    return KategoriModel(
+  factory Kategori.fromJson(Map<String, dynamic> json) {
+    return Kategori(
       kategoriId: json['kategori_id'],
       namaKategori: json['nama_kategori'],
     );

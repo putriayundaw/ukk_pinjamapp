@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/models/users_model.dart';
 
 class UpdateUser extends StatefulWidget {
-  const UpdateUser({super.key});
+  final UserModel user;
+  const UpdateUser({super.key, required this.user});
 
   @override
   State<UpdateUser> createState() => _UpdateUserState();

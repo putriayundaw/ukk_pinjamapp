@@ -1,9 +1,11 @@
+
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/alat_screen.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/user_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/dashboard/home_screen.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 
-import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/user_screen.dart';
-import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/alat_screen.dart';
-import 'package:aplikasi_pinjam_ukk/screens/admin/settings/settings_screen.dart';
+
 
 class DashboardAdmin extends StatefulWidget {
   const DashboardAdmin({super.key});
@@ -17,8 +19,8 @@ class _DashboardAdminState extends State<DashboardAdmin> {
 
   static final List<Widget> _pages = <Widget>[
     const HomeScreenContent(),
-    const UserScreen(),
-    AlatScreen(),
+      UserScreen(),
+     AlatScreen(),
     const Center(child: Text('Halaman Manajemen')),
     const SettingsScreen(),
   ];

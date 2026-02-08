@@ -62,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: Sizes.xxl),
               const Text(
-                'CasHieR',
+                'PinjamAja',
                 style: TextStyle(
                   color: AppColors.Blue,
                   fontSize: Sizes.fontSizeB,

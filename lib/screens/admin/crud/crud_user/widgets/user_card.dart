@@ -1,15 +1,18 @@
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/create_user.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/update_user.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/models/users_model.dart';
 
 class UserCard extends StatelessWidget {
-  final String name;
-  final String role;
+  final UserModel user;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const UserCard({
     super.key,
-    required this.name,
-    required this.role,
+    required this.user,
     required this.onEdit,
     required this.onDelete,
   });
@@ -30,21 +33,21 @@ class UserCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                name,
+                user.nama ?? 'Nama tidak tersedia',
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 4),
-              Text(role, style: const TextStyle(color: Colors.grey)),
+              Text(user.role ?? 'Role tidak tersedia', style: const TextStyle(color: Colors.grey)),
             ],
           ),
           Row(
             children: [
               IconButton(
                 icon: const Icon(Icons.edit, color: Colors.blue),
-                onPressed: onEdit,
+                 onPressed: onEdit,
               ),
               IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),

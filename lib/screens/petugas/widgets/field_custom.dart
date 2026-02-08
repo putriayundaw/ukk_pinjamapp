@@ -1,34 +1,31 @@
-// lib/widgets/custom_input_field.dart
-import 'package:aplikasi_pinjam_ukk/utils/colors.dart';
-import 'package:aplikasi_pinjam_ukk/utils/sizes.dart';
 import 'package:flutter/material.dart';
 
 class CustomInputField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final String hintText;
-  final bool obscureText;
-  final bool enabled;
   final String? errorText;
   final bool showError;
-  final Function(String)? onChanged;
+  final bool enabled;
   final TextInputType? keyboardType;
-  final Widget? suffixIcon;
   final bool autoFocus;
+  final bool obscureText;
+  final Widget? suffixIcon;
+  final ValueChanged<String>? onChanged;
 
   const CustomInputField({
     super.key,
     required this.controller,
     required this.label,
     required this.hintText,
-    this.obscureText = false,
-    this.enabled = true,
     this.errorText,
     this.showError = false,
-    this.onChanged,
+    this.enabled = true,
     this.keyboardType,
-    this.suffixIcon,
     this.autoFocus = false,
+    this.obscureText = false,
+    this.suffixIcon,
+    this.onChanged,
   });
 
   @override
@@ -36,85 +33,50 @@ class CustomInputField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label
         Text(
           label,
-          style: TextStyle(
-            color: Colors.grey[700],
-            fontSize: 14,
+          style: const TextStyle(
+            fontSize: 16,
             fontWeight: FontWeight.w500,
+            color: Colors.black87,
           ),
         ),
         const SizedBox(height: 8),
-        
-        // Input Field
-        TextFormField(
+        TextField(
           controller: controller,
-          obscureText: obscureText,
           enabled: enabled,
           keyboardType: keyboardType,
           autofocus: autoFocus,
+          obscureText: obscureText,
+          onChanged: onChanged,
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.grey[50],
+            errorText: showError ? errorText : null,
+            suffixIcon: suffixIcon,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(Sizes.inputFieldRadius),
-              borderSide: BorderSide(
-                color: showError ? Colors.red : Colors.grey[300]!,
-                width: 1,
-              ),
+              borderRadius: BorderRadius.circular(12),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(Sizes.inputFieldRadius),
-              borderSide: BorderSide(
-                color: showError ? Colors.red : Colors.grey[300]!,
-                width: 1,
-              ),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade300),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(Sizes.inputFieldRadius),
-              borderSide: BorderSide(
-                color: showError ? Colors.red : AppColors.Blue,
-                width: 2,
-              ),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.blue, width: 2),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(Sizes.inputFieldRadius),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 2,
-              ),
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
             ),
-            suffixIcon: suffixIcon,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red, width: 2),
             ),
+            filled: true,
+            fillColor: enabled ? Colors.white : Colors.grey.shade100,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-          ),
-          onChanged: onChanged,
         ),
-        
-        // Error Message
-        if (showError && errorText != null && errorText!.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 6, left: 4),
-            child: Text(
-              errorText!,
-              style: const TextStyle(
-                color: Colors.red,
-                fontSize: 12,
-              ),
-            ),
-          ),
       ],
     );
   }

@@ -1,32 +1,48 @@
 // main.dart
-
+import 'dart:async';
 import 'package:aplikasi_pinjam_ukk/controller/auth_controller.dart';
-import 'package:aplikasi_pinjam_ukk/screens/admin/dashboard/dashboard_admin.dart';
+import 'package:aplikasi_pinjam_ukk/controller/kategori_controller.dart';
+import 'package:aplikasi_pinjam_ukk/controller/alat_controller.dart'; // Tambahkan ini
+import 'package:aplikasi_pinjam_ukk/controller/user_controller.dart'; // Tambahkan ini
 import 'package:aplikasi_pinjam_ukk/screens/splash_screen.dart';
+import 'package:aplikasi_pinjam_ukk/screens/auth/login_screen.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/dashboard/dashboard_admin.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inisialisasi Supabase dengan session persistence
-  await Supabase.initialize(
-    url: 'https://plmmhkfvucxwyyjxlkyc.supabase.co',
-    anonKey: 'sb_publishable_9QkzrnGaWWu_9kdPhAcXsg_pxBsQemQ',
-    authOptions: const FlutterAuthClientOptions(
-      autoRefreshToken: true,
-      // persistSession: true,  // Aktifkan untuk menyimpan sesi
-    ),
-  );
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.dumpErrorToConsole(details);
+  };
 
-  // Inisialisasi controller
-  Get.put(AuthController()); 
+  runZonedGuarded(() async {
+    try {
+      await Supabase.initialize(
+        url: 'https://plmmhkfvucxwyyjxlkyc.supabase.co',
+        anonKey: 'sb_publishable_9QkzrnGaWWu_9kdPhAcXsg_pxBsQemQ',
+        authOptions: const FlutterAuthClientOptions(
+          autoRefreshToken: true,
+        ),
+      );
+    } catch (e) {
+      print('Supabase initialization failed: $e');
+      // Fallback or show error
+    }
 
+    // Inisialisasi controller
+    Get.put(AuthController());
+    Get.put(KategoriController());
+    Get.put(AlatController()); // Tambahkan ini
+    Get.put(UserController()); // Tambahkan ini
 
-  runApp(const MyApp());
+    runApp(const MyApp());
+  }, (error, stack) {
+    print('Error: $error');
+    print('Stack: $stack');
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -35,8 +51,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      home: const DashboardAdmin(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
+      getPages: [
+        GetPage(name: '/splash', page: () => const SplashScreen()),
+        GetPage(name: '/login', page: () => const LoginScreen()),
+        GetPage(name: '/dashboardAdmin', page: () => const DashboardAdmin()),
+        // Add other routes as needed
+      ],
       theme: ThemeData(
         inputDecorationTheme: InputDecorationTheme(
           filled: true,

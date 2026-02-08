@@ -1,14 +1,55 @@
+import 'package:aplikasi_pinjam_ukk/controller/alat_controller.dart';
+import 'package:aplikasi_pinjam_ukk/controller/kategori_controller.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/models/alat_models.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/models/kategori_models.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class CreateAlat extends StatelessWidget {
+class CreateAlat extends StatefulWidget {
   const CreateAlat({super.key});
+
+  @override
+  State<CreateAlat> createState() => _CreateAlatState();
+}
+
+class _CreateAlatState extends State<CreateAlat> {
+  final AlatController alatC = Get.find<AlatController>();
+  final KategoriController kategoriC = Get.find<KategoriController>();
+
+  final TextEditingController namaController = TextEditingController();
+  final TextEditingController stokController = TextEditingController();
+  int? selectedKategoriId;
+
+  @override
+  void dispose() {
+    namaController.dispose();
+    stokController.dispose();
+    super.dispose();
+  }
+
+  void _createAlat() {
+    if (namaController.text.isEmpty || stokController.text.isEmpty || selectedKategoriId == null) {
+      Get.snackbar('Error', 'Semua field harus diisi');
+      return;
+    }
+
+    final newAlat = AlatModel(
+      namaAlat: namaController.text,
+      stok: int.parse(stokController.text),
+      kategoriId: selectedKategoriId!,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    alatC.createAlat(newAlat);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Create Product',
+          'Tambah Alat',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Colors.blue,
@@ -46,6 +87,7 @@ class CreateAlat extends StatelessWidget {
 
             /// PRODUCT NAME
             TextField(
+              controller: namaController,
               decoration: _inputDecoration(
                 'Nama Alat',
                 Icons.shopping_cart,
@@ -56,6 +98,7 @@ class CreateAlat extends StatelessWidget {
 
             /// STOCK
             TextField(
+              controller: stokController,
               keyboardType: TextInputType.number,
               decoration: _inputDecoration(
                 'Jumlah',
@@ -65,30 +108,30 @@ class CreateAlat extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            const SizedBox(height: 20),
-
-            /// CATEGORY DROPDOWN (UI ONLY)
-            DropdownButtonFormField<String>(
-              decoration: _inputDecoration(
-                'Pilih Kategori',
-                Icons.category,
-              ),
-              items: const [
-                DropdownMenuItem(
-                  value: 'Elektronik',
-                  child: Text('Elektronik'),
+            /// CATEGORY DROPDOWN
+            Obx(() {
+              if (kategoriC.isLoading.value) {
+                return const CircularProgressIndicator();
+              }
+              return DropdownButtonFormField<int>(
+                value: selectedKategoriId,
+                decoration: _inputDecoration(
+                  'Pilih Kategori',
+                  Icons.category,
                 ),
-                DropdownMenuItem(
-                  value: 'Kesenian',
-                  child: Text('Kesenian'),
-                ),
-                DropdownMenuItem(
-                  value: 'Olahraga',
-                  child: Text('Olahraga'),
-                ),
-              ],
-              onChanged: (_) {},
-            ),
+                items: kategoriC.kategoriList.map((Kategori kategori) {
+                  return DropdownMenuItem<int>(
+                    value: kategori.kategoriId,
+                    child: Text(kategori.namaKategori),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedKategoriId = value;
+                  });
+                },
+              );
+            }),
 
             const SizedBox(height: 40),
 
@@ -97,7 +140,7 @@ class CreateAlat extends StatelessWidget {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: _createAlat,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   shape: RoundedRectangleBorder(

@@ -1,46 +1,48 @@
+// pastikan kategori_controller.dart ada dan berfungsi
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/models/kategori_models.dart';
 import 'package:get/get.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class KategoriController extends GetxController {
-  // list kategori
-  final kategoriList = <KategoriModel>[].obs;
-
-  // kategori terpilih (untuk filter)
-  final selectedKategoriId = 0.obs;
-
-  // loading
+  final supabase = Supabase.instance.client;
+  final kategoriList = <Kategori>[].obs;
   final isLoading = false.obs;
-
+  
   @override
   void onInit() {
     super.onInit();
     fetchKategori();
   }
-
-  // 🔹 simulasi fetch dari API
+  
   Future<void> fetchKategori() async {
     try {
       isLoading.value = true;
+      print('🔄 Memulai fetchKategori...');
+      final response = await supabase
+          .from('kategori')
+          .select()
+          .order('nama_kategori', ascending: true);
 
-      // 🔥 ganti ini nanti dengan API kamu
-      final response = [
-        {
-          "kategori_id": 1,
-          "nama_kategori": "elektronik",
+      print('📡 Response kategori dari Supabase: $response');
+
+      if (response != null) {
+        kategoriList.value = (response as List)
+            .map((e) => Kategori.fromJson(e))
+            .toList();
+        print('✅ Data kategori berhasil diambil: ${kategoriList.length} item');
+        if (kategoriList.isNotEmpty) {
+          print('📋 Contoh kategori pertama: ${kategoriList.first.namaKategori}');
+        } else {
+          print('⚠️ Tidak ada data kategori di database');
         }
-      ];
-
-      kategoriList.value =
-          response.map((e) => KategoriModel.fromJson(e)).toList();
+      } else {
+        print('⚠️ Response kategori null');
+      }
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      print('❌ Error fetchKategori: $e');
     } finally {
       isLoading.value = false;
     }
-  }
-
-  // 🔹 pilih kategori
-  void selectKategori(int kategoriId) {
-    selectedKategoriId.value = kategoriId;
   }
 }
