@@ -1,14 +1,14 @@
 import 'package:aplikasi_pinjam_ukk/screens/admin/log_aktivitas/log_aktivitas.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/widgets/overview_section.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/widgets/stat_card.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-import '../widgets/stat_card.dart';
-import '../widgets/overview_section.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 
-class HomeScreenContent extends StatelessWidget {
-  const HomeScreenContent({super.key});
+class HomePetugas extends StatelessWidget {
+  const HomePetugas({super.key});
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -61,7 +61,7 @@ class HomeScreenContent extends StatelessWidget {
         StatCard(title: 'Total User', value: '20', color: Color(0xFFE3F2FD)),
         StatCard(title: 'Jumlah Alat', value: '108', color: Color(0xFFE8F5E9)),
         StatCard(title: 'Peminjam Aktif', value: '78', color: Color(0xFFFFF3E0)),
-        StatCard(title: 'Pengembalian\nHari ini', value: '12', color: Color(0xFFF3E5F5)),
+        StatCard(title: 'PengembalianHari ini', value: '12', color: Color(0xFFF3E5F5)),
       ],
     );
   }

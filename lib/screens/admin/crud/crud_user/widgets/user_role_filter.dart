@@ -13,12 +13,15 @@ class UserRoleFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: [
-        _button('Petugas', 0),
-        const SizedBox(width: 10),
-        _button('Peminjam', 1),
-      ],
-    );
+  children: [
+    _button('Semua', 0),
+    const SizedBox(width: 10),
+    _button('Petugas', 1),
+    const SizedBox(width: 10),
+    _button('Peminjam', 2),
+  ],
+);
+
   }
 
   Widget _button(String text, int index) {

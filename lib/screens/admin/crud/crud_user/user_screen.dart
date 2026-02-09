@@ -17,24 +17,20 @@ class UserScreen extends StatefulWidget {
 class _UserScreenState extends State<UserScreen> {
   final UserController userController = Get.find<UserController>();
   final TextEditingController searchController = TextEditingController();
+
   int selectedRole = 0;
 
   @override
   void initState() {
     super.initState();
-    userController.getUsers();
-  }
-
-  @override
-  void dispose() {
-    searchController.dispose();
-    super.dispose();
+    userController.getUsers(); // ambil data dari Supabase
   }
 
   void _confirmDelete(UserModel user) {
     Get.defaultDialog(
       title: 'Hapus Pengguna',
-      middleText: 'Apakah Anda yakin ingin menghapus ${user.nama ?? 'pengguna ini'}?',
+      middleText:
+          'Apakah Anda yakin ingin menghapus ${user.nama ?? 'pengguna ini'}?',
       textConfirm: 'Hapus',
       textCancel: 'Batal',
       confirmTextColor: Colors.white,
@@ -52,7 +48,7 @@ class _UserScreenState extends State<UserScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Tambah Pengguna',
+          'Data Pengguna',
           style: TextStyle(color: Colors.blue),
         ),
         centerTitle: true,
@@ -63,7 +59,7 @@ class _UserScreenState extends State<UserScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue,
         onPressed: () {
-            Get.to(() => const CreateUser());
+          Get.to(() =>  CreateUser());
         },
         child: const Icon(Icons.add),
       ),
@@ -120,8 +116,16 @@ class _UserScreenState extends State<UserScreen> {
       }
 
       final filteredUsers = userController.usersList.where((user) {
-        final matchesSearch = (user.nama?.toLowerCase() ?? '').contains(searchController.text.toLowerCase());
-        final matchesRole = selectedRole == 0 || user.role == (selectedRole == 1 ? 'Petugas' : 'Peminjam');
+        final matchesSearch =
+            (user.nama?.toLowerCase() ?? '')
+                .contains(searchController.text.toLowerCase());
+
+        // SAMAKAN DENGAN DB (huruf kecil)
+       final matchesRole =
+  selectedRole == 0 ||
+  (selectedRole == 1 && user.role == 'petugas') ||
+  (selectedRole == 2 && user.role == 'peminjam');
+
         return matchesSearch && matchesRole;
       }).toList();
 

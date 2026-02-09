@@ -121,7 +121,7 @@ class AuthController extends GetxController {
       case 'petugas':
         Get.offAll(() => const DashboardPetugas());
         break;
-      case 'user':
+      case 'peminjam':
         Get.offAll(() => const DashboardPeminjam());
         break;
       default:

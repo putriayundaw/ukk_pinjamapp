@@ -1,13 +1,15 @@
-import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/models/alat_models.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../screens/admin/crud/crud_alat/models/alat_models.dart';
 
 class AlatController extends GetxController {
   final supabase = Supabase.instance.client;
 
   final alatList = <AlatModel>[].obs;
   final filteredAlatList = <AlatModel>[].obs;
-
   final isLoading = false.obs;
 
   @override
@@ -16,7 +18,7 @@ class AlatController extends GetxController {
     fetchAlat();
   }
 
-  // ================= GET =================
+  // ================= FETCH =================
   Future<void> fetchAlat() async {
     try {
       isLoading.value = true;
@@ -29,9 +31,9 @@ class AlatController extends GetxController {
       final data = response as List;
 
       alatList.value = data.map((e) => AlatModel.fromJson(e)).toList();
-
       filteredAlatList.assignAll(alatList);
     } catch (e) {
+      print('Error fetchAlat: $e');
       Get.snackbar('Error', 'Gagal mengambil data alat');
     } finally {
       isLoading.value = false;
@@ -50,32 +52,65 @@ class AlatController extends GetxController {
   }
 
   // ================= CREATE =================
-  Future<void> createAlat(AlatModel alat) async {
-    try {
-      await supabase.from('alat').insert(alat.toJson());
-      fetchAlat();
-      Get.back();
-      Get.snackbar('Sukses', 'Alat berhasil ditambahkan');
-    } catch (e) {
-      Get.snackbar('Error', 'Gagal menambahkan alat');
-    }
-  }
+Future<bool> createAlat(AlatModel alat, {Uint8List? imageBytes}) async {
+  try {
+    String imageUrl = '';
 
-  // ================= UPDATE =================
-  Future<void> updateAlat(AlatModel alat) async {
-    try {
-      await supabase
-          .from('alat')
-          .update(alat.toJson())
-          .eq('alat_id', alat.alatId!); // 👈 FIX DI SINI
-
-      fetchAlat();
-      Get.back();
-      Get.snackbar('Sukses', 'Alat berhasil diperbarui');
-    } catch (e) {
-      Get.snackbar('Error', 'Gagal update alat');
+    if (imageBytes != null) {
+      // Konversi ke base64
+      imageUrl = 'data:image/png;base64,${base64Encode(imageBytes)}';
     }
+
+    // Simpan ke tabel langsung
+    await supabase.from('alat').insert({
+      'nama_alat': alat.namaAlat,
+      'stok': alat.stok,
+      'kategori_id': alat.kategoriId,
+      'image_url': imageUrl,
+      'created_at': alat.createdAt.toIso8601String(),
+      'updated_at': alat.updatedAt.toIso8601String(),
+    });
+
+    fetchAlat();
+    Get.back();
+    Get.snackbar('Sukses', 'Alat berhasil ditambahkan');
+    return true;
+  } catch (e) {
+    print('Error createAlat: $e');
+    Get.snackbar('Error', 'Gagal menambahkan alat');
+    return false;
   }
+}
+
+
+ Future<void> updateAlat(AlatModel alat, {Uint8List? imageBytes}) async {
+  try {
+    String? imageUrl = alat.imageUrl;
+
+    if (imageBytes != null) {
+      // konversi ke base64
+      imageUrl = 'data:image/png;base64,${base64Encode(imageBytes)}';
+    }
+
+    // update ke tabel
+    await supabase.from('alat').update({
+      'nama_alat': alat.namaAlat,
+      'stok': alat.stok,
+      'kategori_id': alat.kategoriId,
+      'status': alat.status,
+      'image_url': imageUrl,
+      'updated_at': DateTime.now().toIso8601String(),
+    }).eq('alat_id', alat.alatId!);
+
+    fetchAlat();
+    Get.back();
+    Get.snackbar('Sukses', 'Alat berhasil diperbarui');
+  } catch (e) {
+    print('Error updateAlat: $e');
+    Get.snackbar('Error', 'Gagal update alat');
+  }
+}
+
 
   // ================= DELETE =================
   Future<void> deleteAlat(int alatId) async {
@@ -84,6 +119,7 @@ class AlatController extends GetxController {
       fetchAlat();
       Get.snackbar('Sukses', 'Alat berhasil dihapus');
     } catch (e) {
+      print('Error deleteAlat: $e');
       Get.snackbar('Error', 'Gagal menghapus alat');
     }
   }

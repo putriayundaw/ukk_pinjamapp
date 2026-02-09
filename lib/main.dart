@@ -51,14 +51,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      home: const SplashScreen(),
+      home: const DashboardAdmin(),
       debugShowCheckedModeBanner: false,
-      getPages: [
-        GetPage(name: '/splash', page: () => const SplashScreen()),
-        GetPage(name: '/login', page: () => const LoginScreen()),
-        GetPage(name: '/dashboardAdmin', page: () => const DashboardAdmin()),
-        // Add other routes as needed
-      ],
+      
       theme: ThemeData(
         inputDecorationTheme: InputDecorationTheme(
           filled: true,

@@ -17,13 +17,19 @@ class DashboardAdmin extends StatefulWidget {
 class _DashboardAdminState extends State<DashboardAdmin> {
   int _selectedIndex = 0;
 
-  static final List<Widget> _pages = <Widget>[
-    const HomeScreenContent(),
-      UserScreen(),
-     AlatScreen(),
-    const Center(child: Text('Halaman Manajemen')),
-    const SettingsScreen(),
-  ];
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+       HomeScreenContent(),
+       UserScreen(),
+       AlatScreen(),
+       Center(child: Text('Halaman Manajemen')),
+       SettingsScreen(),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);
@@ -45,7 +51,7 @@ class _DashboardAdminState extends State<DashboardAdmin> {
               backgroundColor: Colors.transparent,
               elevation: 0,
             )
-          : null, // ⬅️ halaman lain tanpa AppBar
+          : null,
 
       body: _pages[_selectedIndex],
 
