@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:aplikasi_pinjam_ukk/controller/user_controller.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/models/users_model.dart';
 
 class UpdateUser extends StatefulWidget {
@@ -10,20 +12,27 @@ class UpdateUser extends StatefulWidget {
 }
 
 class _UpdateUserState extends State<UpdateUser> {
-  bool _obscurePassword = true;
+  final UserController userController = Get.find<UserController>();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+
   String? selectedRole;
 
-  void _togglePasswordVisibility() {
-    setState(() {
-      _obscurePassword = !_obscurePassword;
-    });
+  @override
+  void initState() {
+    super.initState();
+    nameController.text = widget.user.nama ?? '';
+    emailController.text = widget.user.email ?? '';
+    selectedRole = widget.user.role ?? 'peminjam';
   }
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Pengguna'),
+        title: const Text('Perbarui Pengguna'),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.blue,
@@ -46,6 +55,7 @@ class _UpdateUserState extends State<UpdateUser> {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: nameController,
                 decoration: _inputDecoration(
                   hint: 'Masukkan nama',
                 ),
@@ -63,43 +73,14 @@ class _UpdateUserState extends State<UpdateUser> {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: _inputDecoration(
                   hint: 'Masukkan email',
                 ),
               ),
 
-              const SizedBox(height: 20),
 
-              /// PASSWORD FIELD
-              const Text(
-                'Your Password',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                obscureText: _obscurePassword,
-                decoration: InputDecoration(
-                  hintText: 'Masukkan password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: Colors.grey,
-                    ),
-                    onPressed: _togglePasswordVisibility,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
 
               /// ROLE FIELD
               const Text(
@@ -150,7 +131,21 @@ class _UpdateUserState extends State<UpdateUser> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    if (nameController.text.isEmpty ||
+                        emailController.text.isEmpty ||
+                        selectedRole == null) {
+                      Get.snackbar('Error', 'Semua field harus diisi');
+                      return;
+                    }
+                    UserModel updatedUser = UserModel(
+                      id: widget.user.id,
+                      nama: nameController.text,
+                      email: emailController.text,
+                      role: selectedRole!,
+                    );
+                    userController.updateUser(updatedUser);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(

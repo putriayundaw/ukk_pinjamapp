@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:aplikasi_pinjam_ukk/controller/user_controller.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/user_screen.dart';
 
 class CreateUser extends StatefulWidget {
   const CreateUser({super.key});
@@ -8,6 +11,11 @@ class CreateUser extends StatefulWidget {
 }
 
 class _CreateUserState extends State<CreateUser> {
+  final UserController userController = Get.find<UserController>();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
   bool _obscurePassword = true;
   String? selectedRole;
 
@@ -44,6 +52,7 @@ class _CreateUserState extends State<CreateUser> {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: nameController,
                 decoration: _inputDecoration(
                   hint: 'Masukkan nama',
                 ),
@@ -61,6 +70,7 @@ class _CreateUserState extends State<CreateUser> {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: _inputDecoration(
                   hint: 'Masukkan email',
@@ -79,6 +89,7 @@ class _CreateUserState extends State<CreateUser> {
               ),
               const SizedBox(height: 8),
               TextField(
+                controller: passwordController,
                 obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   hintText: 'Masukkan password',
@@ -148,7 +159,24 @@ class _CreateUserState extends State<CreateUser> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    if (nameController.text.isEmpty ||
+                        emailController.text.isEmpty ||
+                        passwordController.text.isEmpty ||
+                        selectedRole == null) {
+                      Get.snackbar('Error', 'Semua field harus diisi');
+                      return;
+                    }
+                    userController.createUser(
+                      nama: nameController.text,
+                      email: emailController.text,
+                      password: passwordController.text,
+                      role: selectedRole!,
+                    ).then((_) {
+                      // Navigate to UserScreen after successful creation
+                      Get.offAll(() => UserScreen());
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     shape: RoundedRectangleBorder(

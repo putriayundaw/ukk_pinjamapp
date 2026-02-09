@@ -1,53 +1,50 @@
-// alat_models.dart
 class AlatModel {
-  int? alatId;
-  String namaAlat;
-  int stok;
-  int kategoriId;
-  String status;
-  DateTime createdAt;
-  DateTime updatedAt;
-  String? imageUrl;
-  
-  // Untuk join dengan kategori
-  Map<String, dynamic>? kategori; // {kategori_id: X, nama_kategori: "Nama"}
+  final int? alatId;
+  final String namaAlat;
+  final int kategoriId;
+  final int stok;
+  final String status;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String? imageUrl;
 
   AlatModel({
     this.alatId,
     required this.namaAlat,
-    required this.stok,
     required this.kategoriId,
-    this.status = 'tersedia',
-    required this.createdAt,
-    required this.updatedAt,
+    required this.stok,
+    this.status = 'available', // Default value
+    DateTime? createdAt,
+    DateTime? updatedAt,
     this.imageUrl,
-    this.kategori,
-  });
+  })  : this.createdAt = createdAt ?? DateTime.now(), // Default to current time if not provided
+        this.updatedAt = updatedAt ?? DateTime.now(); // Default to current time if not provided
 
+  // Factory method to create an instance of AlatModel from JSON
   factory AlatModel.fromJson(Map<String, dynamic> json) {
     return AlatModel(
       alatId: json['alat_id'],
       namaAlat: json['nama_alat'],
-      stok: json['stok'] ?? 0,
       kategoriId: json['kategori_id'],
-      status: json['status'] ?? 'tersedia',
-      imageUrl: json['image_url'],
+      stok: json['stok'],
+      status: json['status'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
-      kategori: json['kategori'] is Map<String, dynamic> ? json['kategori'] : null,
+      imageUrl: json['image_url'],
     );
   }
 
+  // Method to convert AlatModel instance to JSON
   Map<String, dynamic> toJson() {
     return {
-      if (alatId != null) 'alat_id': alatId,
+      'alat_id': alatId,
       'nama_alat': namaAlat,
-      'stok': stok,
       'kategori_id': kategoriId,
+      'stok': stok,
       'status': status,
-      'image_url': imageUrl,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
+      'image_url': imageUrl,
     };
   }
 }

@@ -18,7 +18,8 @@ class _SplashScreenState extends State<SplashScreen> {
     // Menunggu selama 2 detik sebelum berpindah ke halaman login
     Future.delayed(const Duration(seconds: 2), () {
       // Pindah ke halaman LoginScreen
-      Get.offAll(() => const LoginScreen());
+      final authC = Get.find<AuthController>();
+      authC.checkAuthStatus();
     });
   }
 

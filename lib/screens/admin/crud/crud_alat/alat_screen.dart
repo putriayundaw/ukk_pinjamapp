@@ -3,7 +3,10 @@ import 'package:aplikasi_pinjam_ukk/controller/kategori_controller.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/create_alat.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/models/alat_models.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/update_alat.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/create_kategori.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/kategori_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/models/kategori_models.dart';
+import 'package:aplikasi_pinjam_ukk/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,7 +21,7 @@ class AlatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF0D47A1);
+    AppColors.Blue;
 
     return Stack(
       children: [
@@ -44,7 +47,7 @@ class AlatScreen extends StatelessWidget {
           right: 16,
           bottom: 16,
           child: FloatingActionButton(
-            backgroundColor: primaryBlue,
+            backgroundColor: AppColors.Blue,
             onPressed: () => Get.to(() => const CreateAlat()),
             child: const Icon(Icons.add, color: Colors.white),
           ),
@@ -81,35 +84,40 @@ class AlatScreen extends StatelessWidget {
   }
 
   Widget _buildCategoryFilters() {
-    return Obx(() {
-      if (kategoriC.isLoading.value) return const SizedBox(height: 40);
+  return Obx(() {
+    if (kategoriC.isLoading.value) return const SizedBox(height: 40);
 
-      final List<Map<String, dynamic>> displayList = [
-        {'id': 0, 'nama': 'Semua'},
-        ...kategoriC.kategoriList
-            .map((k) => {'id': k.kategoriId, 'nama': k.namaKategori}),
-      ];
+    final List<Map<String, dynamic>> displayList = [
+      {'id': 0, 'nama': 'Semua'},
+      ...kategoriC.kategoriList
+          .map((k) => {'id': k.kategoriId, 'nama': k.namaKategori}),
+      {'id': -1, 'nama': '+ Tambah Kategori', 'isAdd': true}, // Add the create category button
+    ];
 
-      return SizedBox(
-        height: 40,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: displayList.length,
-          itemBuilder: (context, index) {
-            final kategori = displayList[index];
+    return SizedBox(
+      height: 60, // Increase the height to ensure the chip has space
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: displayList.map((kategori) {
+            final isAddButton = kategori['isAdd'] == true;
+
             return Obx(() => _CategoryChip(
                   key: ValueKey('category_${kategori['id']}'),
                   label: kategori['nama'],
                   isSelected:
                       selectedKategoriId.value == kategori['id'],
-                  onTap: () =>
-                      selectedKategoriId.value = kategori['id'],
+                  isAddButton: isAddButton, // Mark this as an add button
+                  onTap: isAddButton
+                      ? () => Get.to(() =>  KategoriScreen()) // Navigate to create category page
+                      : () => selectedKategoriId.value = kategori['id'],
                 ));
-          },
+          }).toList(),
         ),
-      );
-    });
-  }
+      ),
+    );
+  });
+}
 
   Widget _alatGrid() {
     return Obx(() {
@@ -281,7 +289,7 @@ class AlatScreen extends StatelessWidget {
       required String label,
       required bool isElevated,
       required VoidCallback onPressed}) {
-    const Color primaryBlue = Color(0xFF0D47A1);
+    AppColors.Blue;
     return Expanded(
       child: isElevated
           ? ElevatedButton.icon(
@@ -301,14 +309,14 @@ class AlatScreen extends StatelessWidget {
             )
           : OutlinedButton.icon(
               onPressed: onPressed,
-              icon:  Icon(icon, size: 16, color: primaryBlue),
+              icon:  Icon(icon, size: 16, color: AppColors.Blue),
               label: Text(label,
                   style: const TextStyle(
-                    color: primaryBlue,
+                    color: AppColors.Blue,
                       fontWeight: FontWeight.bold)),
               style: OutlinedButton.styleFrom(
                 side:
-                    const BorderSide(color: primaryBlue, width: 1.5),
+                    const BorderSide(color: AppColors.Blue, width: 1.5),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
                 padding:
@@ -322,34 +330,46 @@ class AlatScreen extends StatelessWidget {
 class _CategoryChip extends StatelessWidget {
   final String label;
   final bool isSelected;
+  final bool isAddButton;  // Add this to differentiate add button
   final VoidCallback onTap;
 
-  const _CategoryChip(
-      {super.key,
-      required this.label,
-      required this.isSelected,
-      required this.onTap});
+  const _CategoryChip({
+    super.key,
+    required this.label,
+    required this.isSelected,
+    this.isAddButton = false,  // Default to false
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF0D47A1);
+      AppColors.Blue;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(right: 10),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: isSelected ? primaryBlue : Colors.grey.shade200,
+          color: isAddButton
+              ? Colors.blue // Different color for 'Add' button
+              : isSelected
+                  ? AppColors.Blue
+                  : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(20),
+          border: isAddButton ? Border.all(color: Colors.blue) : null,
         ),
         child: Center(
-          child: Text(label,
-              style: TextStyle(
-                  color: isSelected
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isAddButton
+                  ? Colors.white // Text color for add button
+                  : isSelected
                       ? Colors.white
                       : Colors.black87,
-                  fontWeight: FontWeight.w600)),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
     );

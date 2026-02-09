@@ -45,4 +45,18 @@ class KategoriController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> createKategori(String namaKategori) async {
+    try {
+      print('🔄 Memulai createKategori dengan nama: $namaKategori');
+      await supabase.from('kategori').insert({
+        'nama_kategori': namaKategori,
+      });
+      print('✅ Kategori berhasil ditambahkan');
+      await fetchKategori(); // Refresh list
+    } catch (e) {
+      print('❌ Error createKategori: $e');
+      throw e;
+    }
+  }
 }

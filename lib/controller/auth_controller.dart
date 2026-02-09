@@ -15,11 +15,7 @@ class AuthController extends GetxController {
   final RxString emailError = ''.obs;
   final RxString passwordError = ''.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    checkAuthStatus(); // Memeriksa status login saat aplikasi dimulai
-  }
+
 
   // Cek status login saat app start
   Future<void> checkAuthStatus() async {

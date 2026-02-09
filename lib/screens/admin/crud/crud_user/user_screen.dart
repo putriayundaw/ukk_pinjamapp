@@ -117,7 +117,7 @@ class _UserScreenState extends State<UserScreen> {
 
       final filteredUsers = userController.usersList.where((user) {
         final matchesSearch =
-            (user.nama?.toLowerCase() ?? '')
+            (user.email?.toLowerCase() ?? '')
                 .contains(searchController.text.toLowerCase());
 
         // SAMAKAN DENGAN DB (huruf kecil)

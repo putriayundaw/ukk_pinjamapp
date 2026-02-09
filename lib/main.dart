@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:aplikasi_pinjam_ukk/controller/auth_controller.dart';
 import 'package:aplikasi_pinjam_ukk/controller/kategori_controller.dart';
 import 'package:aplikasi_pinjam_ukk/controller/alat_controller.dart'; // Tambahkan ini
+import 'package:aplikasi_pinjam_ukk/controller/log_controller.dart';
 import 'package:aplikasi_pinjam_ukk/controller/user_controller.dart'; // Tambahkan ini
 import 'package:aplikasi_pinjam_ukk/screens/splash_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/auth/login_screen.dart';
@@ -37,6 +38,7 @@ Future<void> main() async {
     Get.put(KategoriController());
     Get.put(AlatController()); // Tambahkan ini
     Get.put(UserController()); // Tambahkan ini
+    Get.put(LogAktivitasController()); // Tambahkan ini
 
     runApp(const MyApp());
   }, (error, stack) {

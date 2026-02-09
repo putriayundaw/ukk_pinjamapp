@@ -1,7 +1,9 @@
 
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/alat_screen.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/kategori_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_user/user_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/dashboard/home_screen.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/manajemen/manajemen_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -26,7 +28,7 @@ class _DashboardAdminState extends State<DashboardAdmin> {
        HomeScreenContent(),
        UserScreen(),
        AlatScreen(),
-       Center(child: Text('Halaman Manajemen')),
+       ManajemenScreen(),
        SettingsScreen(),
     ];
   }
