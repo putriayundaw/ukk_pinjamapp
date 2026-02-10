@@ -1,4 +1,3 @@
-// main.dart
 import 'dart:async';
 import 'package:aplikasi_pinjam_ukk/controller/auth_controller.dart';
 import 'package:aplikasi_pinjam_ukk/controller/kategori_controller.dart';
@@ -12,11 +11,14 @@ import 'package:aplikasi_pinjam_ukk/screens/peminjam/dashboard/dashboard_peminja
 import 'package:aplikasi_pinjam_ukk/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart'; // Pastikan intl di-import
+import 'package:intl/date_symbol_data_local.dart'; // Import ini untuk initializeDateFormatting
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
+  // Inisialisasi Supabase
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.dumpErrorToConsole(details);
   };
@@ -35,15 +37,18 @@ Future<void> main() async {
       // Fallback or show error
     }
 
+    // Inisialisasi format tanggal dan waktu untuk locale Indonesia
+    await initializeDateFormatting('id_ID', null);
+
     // Inisialisasi controller
     Get.put(AuthController());
     Get.put(KategoriController());
     Get.put(AlatController());
     Get.put(UserController());
-    Get.put(SettingsScreen());
     Get.put(LogAktivitasController());
     Get.put(PeminjamanController());
 
+    // Menjalankan aplikasi
     runApp(const MyApp());
   }, (error, stack) {
     print('Error: $error');

@@ -11,6 +11,7 @@ class PeminjamanModel {
   final String? petugasId;
 
   final String? emailPeminjam;
+  final String? namaPeminjam;
   final String? namaAlat;
   final String? namaPetugas;
 
@@ -26,6 +27,7 @@ class PeminjamanModel {
     required this.jumlahAlat,
     this.petugasId,
     this.emailPeminjam,
+    this.namaPeminjam,
     this.namaAlat,
     this.namaPetugas,
   });

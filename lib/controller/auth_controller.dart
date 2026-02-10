@@ -1,7 +1,7 @@
 import 'package:aplikasi_pinjam_ukk/screens/admin/dashboard/dashboard_admin.dart';
 import 'package:aplikasi_pinjam_ukk/screens/auth/login_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/peminjam/dashboard/dashboard_peminjam.dart';
-import 'package:aplikasi_pinjam_ukk/screens/petugas/dashboard_petugas.dart';
+import 'package:aplikasi_pinjam_ukk/screens/petugas/dashboard/dashboard_petugas.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -15,6 +15,7 @@ class AuthController extends GetxController {
   // Tambahan untuk profile
   final RxString namaDepan = ''.obs;  // untuk nama depan
   final RxString emailUser = ''.obs;   // untuk email
+  final RxString userId = ''.obs; // untuk user id
 
   // Cek status login saat app start
   Future<void> checkAuthStatus() async {
@@ -32,6 +33,7 @@ class AuthController extends GetxController {
         .single();
 
     final emailSupabase = user.email ?? '';
+    userId.value = user.id;
     namaDepan.value = emailSupabase.split('@')[0];
     emailUser.value = emailSupabase;
 
@@ -80,6 +82,7 @@ class AuthController extends GetxController {
       final String nama = email.split('@')[0];
       namaDepan.value = nama;
       emailUser.value = email;
+      this.userId.value = userId;
 
       // Simpan di Supabase (opsional)
       await _supabase.from('users').upsert({

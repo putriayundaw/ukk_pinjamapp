@@ -1,14 +1,16 @@
+import 'package:aplikasi_pinjam_ukk/controller/alat_controller.dart';
+import 'package:aplikasi_pinjam_ukk/controller/auth_controller.dart';
+import 'package:aplikasi_pinjam_ukk/controller/kategori_controller.dart';
+import 'package:aplikasi_pinjam_ukk/screens/peminjam/transaksi/proses_transaksi.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/widgets/kategori_chips.dart';
 import 'package:aplikasi_pinjam_ukk/screens/peminjam/dashboard/widgets/tools.dart';
 import 'package:aplikasi_pinjam_ukk/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:aplikasi_pinjam_ukk/controller/kategori_controller.dart';
-import 'package:aplikasi_pinjam_ukk/controller/alat_controller.dart';
-import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/widgets/kategori_chips.dart';
-import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/create_alat.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class HomePeminjam extends StatefulWidget {
-  const HomePeminjam({super.key});
+  HomePeminjam({super.key});
 
   @override
   State<HomePeminjam> createState() => _HomePeminjamState();
@@ -19,6 +21,7 @@ class _HomePeminjamState extends State<HomePeminjam> {
   final AlatController alatC = Get.put(AlatController());
 
   final RxInt selectedKategoriId = 0.obs;
+  final AuthController authController = Get.find<AuthController>();
 
   @override
   void initState() {
@@ -33,88 +36,124 @@ class _HomePeminjamState extends State<HomePeminjam> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: Obx(() {
-        final jumlahDipilih = alatC.selectedAlatList.length;
-
-        if (jumlahDipilih == 0) return const SizedBox(); // sembunyikan jika 0
-
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: Padding(
+      body: Stack(
+        children: [
+          // Konten utama kamu di sini (misalnya ListView, Column, dll)
+          SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            child: Container(
-              height: 50,
-              
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Obx(() => Text(
-                        '${alatC.selectedAlatList.length} Items',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      )),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Aksi tombol, misal ke halaman CreateAlat
-                      Get.to(() => const CreateAlat());
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.Blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      'Tambah',
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildUserInfo(),
+                const SizedBox(height: 20),
+                _buildSearchBar(),
+                const SizedBox(height: 24),
+                _buildCategoryRow(),
+                const SizedBox(height: 20),
+                _buildToolsGrid(),
+              ],
             ),
           ),
-        );
-      }),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildUserInfo(),
-            const SizedBox(height: 20),
-            _buildSearchBar(),
-            const SizedBox(height: 24),
-            _buildCategoryRow(),
-            const SizedBox(height: 20),
-            _buildToolsGrid(),
-          ],
-        ),
+
+          // FloatingActionButton manually positioned
+          Positioned(
+            bottom: 16,  // Jarak dari bawah layar
+            left: 16,    // Jarak dari kiri layar
+            right: 16,   // Jarak dari kanan layar
+            child: Obx(() {
+              final jumlahDipilih = alatC.totalSelectedItems;
+
+              if (jumlahDipilih == 0) return const SizedBox(); // sembunyikan jika 0
+
+              return Material(
+                elevation: 6,
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.white,
+                child: Container(
+                  height: 60,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Obx(() => Text(
+                            '${alatC.totalSelectedItems} Items',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                          )),
+                      ElevatedButton(
+                        onPressed: () {
+                      
+                          Get.to(() => const ProsesTransaksi());
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.Blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        ),
+                        child: const Text(
+                          'Proses',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildUserInfo() {
     return Row(
-      children: const [
+      children: [
+        // Mengambil huruf pertama dari email untuk menjadi inisial
         CircleAvatar(
           radius: 28,
-          backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=58'),
+          backgroundColor: Colors.blue,  // Warna background avatar
+          child: Obx(() {
+            // Ambil email dari controller
+            final email = authController.emailUser.value;
+
+            // Ambil huruf pertama dari bagian nama email (sebelum @)
+            final initials = email.isNotEmpty ? email.split('@')[0][0].toUpperCase() : ''; 
+
+            return Text(
+              initials, 
+              style: TextStyle(
+                color: Colors.white,  // Warna teks avatar
+                fontWeight: FontWeight.bold,
+                fontSize: 20,  // Ukuran font inisial
+              ),
+            );
+          }),
         ),
         SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Good Morning',
-                style: TextStyle(color: Colors.grey, fontSize: 14)),
-            Text('admin@gmail.com',
+            Text(
+              'Selamat Datang',
+              style: TextStyle(color: Colors.grey, fontSize: 14),
+            ),
+            Obx(() {
+              final email = authController.emailUser.value;  // Mengambil email dari controller
+              return Text(
+                email,
                 style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16)),
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              );
+            }),
           ],
         ),
       ],
@@ -203,15 +242,10 @@ class _HomePeminjamState extends State<HomePeminjam> {
         itemBuilder: (context, index) {
           final alat = alatC.filteredAlatList[index];
           return ToolCard(
-            imageUrl: (alat.imageUrl == null || alat.imageUrl!.isEmpty)
-                ? 'https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_600,h_600/global/375864/02/sv01/fnd/IND/fmt/png/Scuderia-Ferrari-Speedcat-Driving-Shoes'
-                : alat.imageUrl!,
+            alat: alat,
+            alatC: alatC,
+            imageUrl: alat.imageUrl!,
             title: alat.namaAlat,
-            onAdd: () {
-              if (!alatC.selectedAlatList.contains(alat)) {
-                alatC.selectedAlatList.add(alat);
-              }
-            },
           );
         },
       );

@@ -12,12 +12,15 @@ class AlatController extends GetxController {
   final filteredAlatList = <AlatModel>[].obs;
   final isLoading = false.obs;
 
-  var selectedAlatList = <AlatModel>[].obs;
+  var selectedAlatMap = <int, int>{}.obs; // key: alatId, value: quantity
   @override
   void onInit() {
     super.onInit();
     fetchAlat();
   }
+
+  // Helper to get total selected items count
+  int get totalSelectedItems => selectedAlatMap.values.fold(0, (sum, qty) => sum + qty);
 
   // ================= FETCH =================
   Future<void> fetchAlat() async {

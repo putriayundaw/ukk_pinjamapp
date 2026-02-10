@@ -1,8 +1,2 @@
-- [x] Import PeminjamanController dan Peminjaman model di peminjaman.dart
-- [x] Tambahkan instance controller dan List<Peminjaman> ke state
-- [x] Tambahkan state loading dan error
-- [x] Panggil getAllPeminjaman() di initState
-- [x] Update filteredList untuk menggunakan data real, filter berdasarkan status dan pencarian
-- [x] Update _buildItemCard untuk menampilkan data model (alatId, userId, tanggalPinjam, status)
-- [x] Tambahkan CircularProgressIndicator untuk loading
-- [x] Handle error dengan SnackBar
+- [x] Implement filtering logic in persetujuan.dart to make filters functional
+- [x] Make filter chips scrollable horizontally

@@ -17,7 +17,8 @@ class ActivityCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(32.0),
+      constraints: const BoxConstraints(minHeight: 120),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -34,30 +35,29 @@ class ActivityCardWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                name,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Text(
-                    '$item ',
-                    style: const TextStyle(color: Colors.black54, fontSize: 13),
-                  ),
-                  Text(
-                    date,
-                    style: const TextStyle(color: Colors.black54, fontSize: 13),
-                  ),
-                ],
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  item,
+                  style: const TextStyle(color: Colors.black54, fontSize: 14),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  date,
+                  style: const TextStyle(color: Colors.black54, fontSize: 14),
+                ),
+              ],
+            ),
           ),
           OutlinedButton(
             onPressed: () {},
@@ -66,12 +66,12 @@ class ActivityCardWidget extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               minimumSize: Size.zero,
             ),
             child: Text(
               status,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
             ),
           ),
         ],
