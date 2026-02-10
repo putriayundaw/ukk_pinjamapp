@@ -1,11 +1,13 @@
 import 'package:aplikasi_pinjam_ukk/screens/admin/settings/settings_screen.dart';
-import 'package:aplikasi_pinjam_ukk/screens/peminjam/dashboard/home_petugas.dart';
-import 'package:aplikasi_pinjam_ukk/screens/peminjam/laporan/laporan.dart';
-import 'package:aplikasi_pinjam_ukk/screens/peminjam/pengajuan/pengajuan.dart';
+import 'package:aplikasi_pinjam_ukk/screens/peminjam/dashboard/home_peminjam.dart';
+import 'package:aplikasi_pinjam_ukk/screens/peminjam/aktivitas/aktivitas_peminjam.dart';
+import 'package:aplikasi_pinjam_ukk/screens/peminjam/setting/peminjam.dart';
+import 'package:aplikasi_pinjam_ukk/screens/petugas/pengajuan/pengajuan.dart';
 import 'package:flutter/material.dart';
 
 class DashboardPeminjam extends StatefulWidget {
-  const DashboardPeminjam({super.key});
+  const DashboardPeminjam({super.key}
+  );
 
   @override
   State<DashboardPeminjam> createState() => _DashboardPeminjamState();
@@ -20,11 +22,9 @@ class _DashboardPeminjamState extends State<DashboardPeminjam> {
   void initState() {
     super.initState();
     _pages = [
-       HomePetugas(),
-       Pengajuan(),
-       Laporan(),
-       Center(child: Text('Halaman Manajemen')),
-       SettingsScreen(),
+       HomePeminjam(),
+       AktivitasPeminjam(),
+       PeminjamSetting(),
     ];
   }
 

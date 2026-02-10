@@ -6,6 +6,7 @@ import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/update_alat.dar
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/create_kategori.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/kategori_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/models/kategori_models.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/widgets/kategori_chips.dart';
 import 'package:aplikasi_pinjam_ukk/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -102,7 +103,7 @@ class AlatScreen extends StatelessWidget {
           children: displayList.map((kategori) {
             final isAddButton = kategori['isAdd'] == true;
 
-            return Obx(() => _CategoryChip(
+            return Obx(() => CategoryChip(
                   key: ValueKey('category_${kategori['id']}'),
                   label: kategori['nama'],
                   isSelected:
@@ -327,51 +328,3 @@ class AlatScreen extends StatelessWidget {
   }
 }
 
-class _CategoryChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final bool isAddButton;  // Add this to differentiate add button
-  final VoidCallback onTap;
-
-  const _CategoryChip({
-    super.key,
-    required this.label,
-    required this.isSelected,
-    this.isAddButton = false,  // Default to false
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-      AppColors.Blue;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(right: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(
-          color: isAddButton
-              ? Colors.blue // Different color for 'Add' button
-              : isSelected
-                  ? AppColors.Blue
-                  : Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(20),
-          border: isAddButton ? Border.all(color: Colors.blue) : null,
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isAddButton
-                  ? Colors.white // Text color for add button
-                  : isSelected
-                      ? Colors.white
-                      : Colors.black87,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

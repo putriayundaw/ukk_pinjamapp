@@ -12,6 +12,7 @@ class AlatController extends GetxController {
   final filteredAlatList = <AlatModel>[].obs;
   final isLoading = false.obs;
 
+  var selectedAlatList = <AlatModel>[].obs;
   @override
   void onInit() {
     super.onInit();

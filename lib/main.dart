@@ -4,10 +4,12 @@ import 'package:aplikasi_pinjam_ukk/controller/auth_controller.dart';
 import 'package:aplikasi_pinjam_ukk/controller/kategori_controller.dart';
 import 'package:aplikasi_pinjam_ukk/controller/alat_controller.dart'; // Tambahkan ini
 import 'package:aplikasi_pinjam_ukk/controller/log_controller.dart';
+import 'package:aplikasi_pinjam_ukk/controller/peminjaman_controller.dart';
 import 'package:aplikasi_pinjam_ukk/controller/user_controller.dart'; // Tambahkan ini
-import 'package:aplikasi_pinjam_ukk/screens/splash_screen.dart';
-import 'package:aplikasi_pinjam_ukk/screens/auth/login_screen.dart';
+import 'package:aplikasi_pinjam_ukk/screens/admin/settings/settings_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/dashboard/dashboard_admin.dart';
+import 'package:aplikasi_pinjam_ukk/screens/peminjam/dashboard/dashboard_peminjam.dart';
+import 'package:aplikasi_pinjam_ukk/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -36,9 +38,11 @@ Future<void> main() async {
     // Inisialisasi controller
     Get.put(AuthController());
     Get.put(KategoriController());
-    Get.put(AlatController()); // Tambahkan ini
-    Get.put(UserController()); // Tambahkan ini
-    Get.put(LogAktivitasController()); // Tambahkan ini
+    Get.put(AlatController());
+    Get.put(UserController());
+    Get.put(SettingsScreen());
+    Get.put(LogAktivitasController());
+    Get.put(PeminjamanController());
 
     runApp(const MyApp());
   }, (error, stack) {
@@ -53,9 +57,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      home: const DashboardAdmin(),
+      home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
-      
       theme: ThemeData(
         inputDecorationTheme: InputDecorationTheme(
           filled: true,

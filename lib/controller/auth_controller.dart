@@ -1,11 +1,8 @@
-
 import 'package:aplikasi_pinjam_ukk/screens/admin/dashboard/dashboard_admin.dart';
 import 'package:aplikasi_pinjam_ukk/screens/auth/login_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/peminjam/dashboard/dashboard_peminjam.dart';
 import 'package:aplikasi_pinjam_ukk/screens/petugas/dashboard_petugas.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,32 +12,37 @@ class AuthController extends GetxController {
   final RxString emailError = ''.obs;
   final RxString passwordError = ''.obs;
 
-
+  // Tambahan untuk profile
+  final RxString namaDepan = ''.obs;  // untuk nama depan
+  final RxString emailUser = ''.obs;   // untuk email
 
   // Cek status login saat app start
   Future<void> checkAuthStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  // Gunakan session dari Supabase
+  final session = _supabase.auth.currentSession;
 
-    if (isLoggedIn) {
-      final User? user = _supabase.auth.currentUser;
-      if (user != null) {
-        final response = await _supabase
-            .from('users')
-            .select('role')
-            .eq('id', user.id)
-            .single();
+  if (session != null && session.user != null) {
+    final user = session.user!;
+    
+    // Ambil role
+    final response = await _supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
 
-        final String role = response['role'] as String;
-        _redirectBasedOnRole(role);
-      } else {
-        // Jika user tidak ada, arahkan ke login
-        Get.offAll(() => const LoginScreen());
-      }
-    } else {
-      Get.offAll(() => const LoginScreen());
-    }
+    final emailSupabase = user.email ?? '';
+    namaDepan.value = emailSupabase.split('@')[0];
+    emailUser.value = emailSupabase;
+
+    final String role = response['role'] as String;
+    _redirectBasedOnRole(role);
+  } else {
+    // Jika session null, arahkan ke login
+    Get.offAll(() => const LoginScreen());
   }
+}
+
 
   // Login dengan email dan password
   Future<void> login(String email, String password) async {
@@ -57,40 +59,42 @@ class AuthController extends GetxController {
         emailError.value = 'Format email tidak valid';
         hasError = true;
       }
-
       if (password.isEmpty) {
         passwordError.value = 'Password harus diisi';
         hasError = true;
       }
-
       if (hasError) {
         isLoading.value = false;
         return;
       }
 
-      // Sign in dengan Supabase Auth
+      // Sign in Supabase
       final AuthResponse authResponse = await _supabase.auth.signInWithPassword(
         email: email,
         password: password,
       );
 
-      // Simpan status login di SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true); // Menyimpan status login
-
-      // Ambil user ID dari response
       final String userId = authResponse.user!.id;
 
-      // Query ke tabel users untuk mendapatkan role
+      // Ambil nama depan dari email
+      final String nama = email.split('@')[0];
+      namaDepan.value = nama;
+      emailUser.value = email;
+
+      // Simpan di Supabase (opsional)
+      await _supabase.from('users').upsert({
+        'id': userId,
+        'nama': nama,
+      }, onConflict: 'id');
+
+      // Query role
       final response = await _supabase
           .from('users')
           .select('role')
           .eq('id', userId)
           .single();
-
       final String role = response['role'] as String;
 
-      // Navigasi berdasarkan role
       _redirectBasedOnRole(role);
 
     } on AuthException catch (e) {
@@ -108,7 +112,6 @@ class AuthController extends GetxController {
     }
   }
 
-  // Redirect berdasarkan role
   void _redirectBasedOnRole(String role) {
     switch (role) {
       case 'admin':
@@ -125,28 +128,21 @@ class AuthController extends GetxController {
     }
   }
 
-  // Logout
   Future<void> logout() async {
     try {
       await _supabase.auth.signOut();
-
-      // Hapus status login di SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('isLoggedIn');
-
-      // Redirect ke Login Screen
       Get.offAll(() => const LoginScreen());
     } catch (e) {
       emailError.value = 'Gagal logout';
     }
   }
 
-  // Validasi email
   bool _validateEmail(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
-  // Clear semua error
   void _clearErrors() {
     emailError.value = '';
     passwordError.value = '';

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:io';
+import 'package:aplikasi_pinjam_ukk/utils/colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -86,7 +87,7 @@ class _CreateAlatState extends State<CreateAlat> {
       appBar: AppBar(
         title: const Text(
           'Tambah Alat',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.Blue),
         ),
         centerTitle: true,
       ),

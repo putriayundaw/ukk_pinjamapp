@@ -1,83 +1,83 @@
-// controllers/pengembalian_controller.dart
-
-import 'dart:convert';
 import 'package:aplikasi_pinjam_ukk/screens/admin/manajemen/pengembalian/models/pengembalian_models.dart';
-import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class PengembalianController {
-  final String baseUrl;
+class PengembalianController extends GetxController {
+  final SupabaseClient supabase = Supabase.instance.client;
 
-  PengembalianController({required this.baseUrl});
+  var isLoading = false.obs;
+  var pengembalianList = <Pengembalian>[].obs;
 
-  // Create Pengembalian
-  Future<Pengembalian> createPengembalian(Pengembalian pengembalian) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/pengembalian'),
-      headers: {'Content-Type': 'application/json'},
-      body: pengembalian.toJson(),
-    );
+  /// Ambil semua pengembalian
+  Future<void> fetchPengembalian() async {
+    try {
+      isLoading.value = true;
+      final response = await supabase
+          .from('pengembalian')
+          .select()
+          .order('created_at', ascending: false);
 
-    if (response.statusCode == 201) {
-      // Jika request sukses, parsing response ke model Pengembalian
-      return Pengembalian.fromJson(response.body);
-    } else {
-      throw Exception('Gagal membuat pengembalian');
+      // Supabase v2+ langsung return List
+      if (response != null && response is List) {
+        pengembalianList.value =
+            response.map((e) => Pengembalian.fromJson(e)).toList();
+      }
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  // Get All Pengembalian
-  Future<List<Pengembalian>> getAllPengembalian() async {
-    final response = await http.get(Uri.parse('$baseUrl/pengembalian'));
+  /// Tambah pengembalian baru
+  Future<void> addPengembalian(Pengembalian pengembalian) async {
+    try {
+      isLoading.value = true;
+      final response = await supabase.from('pengembalian').insert([
+        {
+          'peminjaman_id': pengembalian.peminjamanId,
+          'tanggal_kembali_actual':
+              pengembalian.tanggalKembaliActual?.toIso8601String(),
+          'denda': pengembalian.denda,
+          'status': pengembalian.status,
+          'petugas_id': pengembalian.petugasId,
+        }
+      ]);
 
-    if (response.statusCode == 200) {
-      // Parsing JSON response menjadi list Pengembalian
-      List<dynamic> pengembalianList = json.decode(response.body);
-      return pengembalianList
-          .map((json) => Pengembalian.fromMap(json))
-          .toList();
-    } else {
-      throw Exception('Gagal mengambil data pengembalian');
+      if (response != null && response is List) {
+        final inserted = response.first;
+        pengembalianList.add(Pengembalian.fromJson(inserted));
+      }
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  // Get Pengembalian by ID
-  Future<Pengembalian> getPengembalianById(int pengembalianId) async {
-    final response = await http.get(Uri.parse('$baseUrl/pengembalian/$pengembalianId'));
+  /// Update pengembalian
+  Future<void> updatePengembalian(int id, Map<String, dynamic> data) async {
+    try {
+      isLoading.value = true;
+      final response =
+          await supabase.from('pengembalian').update(data).eq('pengembalian_id', id);
 
-    if (response.statusCode == 200) {
-      return Pengembalian.fromJson(response.body);
-    } else {
-      throw Exception('Pengembalian tidak ditemukan');
+      if (response != null && response is List) {
+        final index =
+            pengembalianList.indexWhere((p) => p.pengembalianId == id);
+        if (index != -1) {
+          pengembalianList[index] = Pengembalian.fromJson(response.first);
+        }
+      }
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  // Update Pengembalian
-  Future<Pengembalian> updatePengembalian(int pengembalianId, String status, {DateTime? tanggalKembaliActual, double denda = 0.0}) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/pengembalian/$pengembalianId'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'status': status,
-        'tanggal_kembali_actual': tanggalKembaliActual?.toIso8601String(),
-        'denda': denda,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      return Pengembalian.fromJson(response.body);
-    } else {
-      throw Exception('Gagal memperbarui pengembalian');
-    }
-  }
-
-  // Delete Pengembalian
-  Future<void> deletePengembalian(int pengembalianId) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/pengembalian/$pengembalianId'),
-    );
-
-    if (response.statusCode != 200) {
-      throw Exception('Gagal menghapus pengembalian');
+  /// Hapus pengembalian
+  Future<void> deletePengembalian(int id) async {
+    try {
+      isLoading.value = true;
+      await supabase.from('pengembalian').delete().eq('pengembalian_id', id);
+      pengembalianList.removeWhere((p) => p.pengembalianId == id);
+    } finally {
+      isLoading.value = false;
     }
   }
 }

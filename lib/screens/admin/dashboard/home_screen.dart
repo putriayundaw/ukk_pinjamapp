@@ -40,7 +40,7 @@ class HomeScreenContent extends StatelessWidget {
           children: [
             Text('Selamat Pagi', style: TextStyle(color: Colors.grey)),
             Text(
-              'admin@gmail.com',
+              'ADMIN ',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
