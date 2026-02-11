@@ -14,8 +14,11 @@ class AktivitasPeminjam extends StatefulWidget {
 }
 
 class _AktivitasPeminjamState extends State<AktivitasPeminjam> {
-  final PeminjamanController peminjamanController = Get.put(PeminjamanController());
+  final PeminjamanController peminjamanController =
+      Get.put(PeminjamanController());
+
   final TextEditingController searchController = TextEditingController();
+
   String selectedFilter = 'semua';
 
   @override
@@ -24,23 +27,44 @@ class _AktivitasPeminjamState extends State<AktivitasPeminjam> {
     peminjamanController.fetchUserPeminjaman();
   }
 
+  // ================= FILTER FUNCTION =================
   List<PeminjamanModel> getFilteredPeminjaman() {
     var filtered = peminjamanController.peminjamanList.toList();
 
+    // FILTER STATUS
     if (selectedFilter != 'semua') {
-      if (selectedFilter == 'selesai') {
-        // Asumsikan 'selesai' berarti status 'dikembalikan' atau status akhir
-        filtered = filtered.where((peminjaman) =>
-            peminjaman.status?.toLowerCase() == 'dikembalikan' || peminjaman.status?.toLowerCase() == 'selesai').toList();
-      } else {
-        filtered = filtered.where((peminjaman) =>
-            peminjaman.status?.toLowerCase() == selectedFilter).toList();
-      }
+      filtered = filtered.where((p) {
+        final status = (p.status ?? '').toLowerCase().trim();
+
+        if (selectedFilter == 'selesai') {
+          return status == 'dikembalikan' || status == 'selesai';
+        }
+
+        return status == selectedFilter.toLowerCase().trim();
+      }).toList();
     }
 
-    if (searchController.text.isNotEmpty) {
-      filtered = filtered.where((peminjaman) =>
-          peminjaman.namaAlat?.toLowerCase().contains(searchController.text.toLowerCase()) ?? false).toList();
+    // FILTER SEARCH
+    final keyword = searchController.text.toLowerCase().trim();
+
+    if (keyword.isNotEmpty) {
+      filtered = filtered.where((p) {
+        final namaAlat = (p.namaAlat ?? '').toLowerCase().trim();
+
+        final tanggalPinjam = p.tanggalPinjam != null
+            ? DateFormat('dd MMM yyyy')
+                .format(p.tanggalPinjam!)
+                .toLowerCase()
+            : '';
+
+        final tanggalKembali = DateFormat('dd MMM yyyy')
+            .format(p.tanggalKembali)
+            .toLowerCase();
+
+        return namaAlat.contains(keyword) ||
+            tanggalPinjam.contains(keyword) ||
+            tanggalKembali.contains(keyword);
+      }).toList();
     }
 
     return filtered;
@@ -49,6 +73,7 @@ class _AktivitasPeminjamState extends State<AktivitasPeminjam> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -66,91 +91,99 @@ class _AktivitasPeminjamState extends State<AktivitasPeminjam> {
               ),
               const SizedBox(height: 24),
 
-              // Kolom Pencarian
+              // SEARCH
               TextField(
                 controller: searchController,
                 onChanged: (value) => setState(() {}),
                 decoration: InputDecoration(
-                  hintText: 'Cari alat...',
-                  suffixIcon: const Icon(Icons.search, color: Colors.grey),
+                  hintText: 'Cari Aktivitas',
+                  suffixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.blue),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                      borderRadius: BorderRadius.circular(12)),
                 ),
               ),
+
               const SizedBox(height: 20),
 
-              // Tombol Filter
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    FilterChipWidget(
-                      label: 'semua',
-                      isSelected: selectedFilter == 'semua',
-                      onSelected: () => setState(() => selectedFilter = 'semua'),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterChipWidget(
-                      label: 'menunggu persetujuan',
-                      isSelected: selectedFilter == 'menunggu persetujuan',
-                      onSelected: () => setState(() => selectedFilter = 'menunggu persetujuan'),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterChipWidget(
-                      label: 'disetujui',
-                      isSelected: selectedFilter == 'disetujui',
-                      onSelected: () => setState(() => selectedFilter = 'disetujui'),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterChipWidget(
-                      label: 'selesai',
-                      isSelected: selectedFilter == 'selesai',
-                      onSelected: () => setState(() => selectedFilter = 'selesai'),
-                    ),
-                  ],
-                ),
-              ),
+              // ================= FILTER CHIP =================
+            SingleChildScrollView(
+  scrollDirection: Axis.horizontal,
+  child: Row(
+    children: [
+      FilterChipWidget(
+        label: 'semua',
+        selectedFilter: selectedFilter,
+        onSelected: () =>
+            setState(() => selectedFilter = 'semua'),
+      ),
+
+      const SizedBox(width: 8),
+
+      FilterChipWidget(
+        label: 'menunggu persetujuan',
+        selectedFilter: selectedFilter,
+        onSelected: () =>
+            setState(() => selectedFilter = 'menunggu persetujuan'),
+      ),
+
+      const SizedBox(width: 8),
+
+      FilterChipWidget(
+        label: 'disetujui',
+        selectedFilter: selectedFilter,
+        onSelected: (
+          
+        ) =>
+            setState(() => selectedFilter = 'disetujui'),
+      ),
+
+      const SizedBox(width: 8),
+
+      FilterChipWidget(
+        label: 'selesai',
+        selectedFilter: selectedFilter,
+        onSelected: () =>
+            setState(() => selectedFilter = 'selesai'),
+      ),
+    ],
+  ),
+),
+
               const SizedBox(height: 24),
 
-              // Daftar Kartu Aktivitas
+              // ================= LIST =================
               Expanded(
                 child: Obx(() {
                   if (peminjamanController.isLoading.value) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                        child: CircularProgressIndicator());
                   }
 
-                  final filteredPeminjaman = getFilteredPeminjaman();
+                  final filtered = getFilteredPeminjaman();
 
-                  if (filteredPeminjaman.isEmpty) {
-                    return const Center(child: Text('Tidak ada aktivitas'));
+                  if (filtered.isEmpty) {
+                    return const Center(
+                        child: Text('Tidak ada aktivitas'));
                   }
 
                   return ListView.builder(
-                    itemCount: filteredPeminjaman.length,
+                    itemCount: filtered.length,
                     itemBuilder: (context, index) {
-                      final peminjaman = filteredPeminjaman[index];
+                      final p = filtered[index];
                       final dateFormat = DateFormat('dd MMM');
-                      final tanggalPinjam = peminjaman.tanggalPinjam != null
-                          ? dateFormat.format(peminjaman.tanggalPinjam!)
-                          : '';
-                      final tanggalKembali = dateFormat.format(peminjaman.tanggalKembali);
 
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
+                        padding:
+                            const EdgeInsets.only(bottom: 12.0),
                         child: ActivityCardWidget(
-                          name: peminjaman.emailPeminjam ?? 'ALAT ${peminjaman.namaAlat ?? '-'}',
-                          item: 'Jumlah: ${peminjaman.jumlahAlat} | Petugas: ${peminjaman.namaPetugas ?? 'Belum disetujui'}',
-                          date: '$tanggalPinjam - $tanggalKembali',
-                          status: peminjaman.status ?? 'unknown',
+                          name: p.namaAlat ?? 'Alat tidak diketahui',
+                          item:
+                              'Jumlah: ${p.jumlahAlat} | Petugas: ${p.namaPetugas ?? 'Belum disetujui'}',
+                          date:
+                              '${dateFormat.format(p.tanggalPinjam!)} - ${dateFormat.format(p.tanggalKembali)}',
+                          status: p.status ?? 'unknown',
                         ),
                       );
                     },

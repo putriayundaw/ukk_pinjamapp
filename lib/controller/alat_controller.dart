@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,123 +7,127 @@ import '../screens/admin/crud/crud_alat/models/alat_models.dart';
 class AlatController extends GetxController {
   final supabase = Supabase.instance.client;
 
-  final alatList = <AlatModel>[].obs;
-  final filteredAlatList = <AlatModel>[].obs;
+  final alatList = <AlatModel>[].obs; // Semua data alat
+  final filteredAlatList = <AlatModel>[].obs; // Data setelah filter/search
   final isLoading = false.obs;
 
   var selectedAlatMap = <int, int>{}.obs; // key: alatId, value: quantity
+  int? currentFilterKategoriId;
+
   @override
   void onInit() {
     super.onInit();
-    fetchAlat();
+    _setupRealtimeStream();
+    ever(
+        alatList, (_) => _applyFilter()); // otomatis filter setiap data berubah
   }
 
-  // Helper to get total selected items count
-  int get totalSelectedItems => selectedAlatMap.values.fold(0, (sum, qty) => sum + qty);
-
-  // ================= FETCH =================
-  Future<void> fetchAlat() async {
-    try {
-      isLoading.value = true;
-
-      final response = await supabase
-          .from('alat')
-          .select()
-          .order('created_at', ascending: false);
-
-      final data = response as List;
-
-      alatList.value = data.map((e) => AlatModel.fromJson(e)).toList();
-      filteredAlatList.assignAll(alatList);
-    } catch (e) {
-      print('Error fetchAlat: $e');
-      Get.snackbar('Error', 'Gagal mengambil data alat');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  // ================= FILTER =================
-  void filterByKategori(int kategoriId) {
-    if (kategoriId == 0) {
+  void _applyFilter() {
+    if (currentFilterKategoriId == null || currentFilterKategoriId == 0) {
       filteredAlatList.assignAll(alatList);
     } else {
       filteredAlatList.assignAll(
-        alatList.where((e) => e.kategoriId == kategoriId).toList(),
+        alatList.where((e) => e.kategoriId == currentFilterKategoriId).toList(),
       );
     }
   }
 
+  void _setupRealtimeStream() {
+    // Bind stream ke alatList
+    alatList.bindStream(
+      supabase
+          .from('alat')
+          .stream(primaryKey: ['alat_id'])
+          .order('created_at', ascending: false)
+          .map((data) => data.map((e) => AlatModel.fromJson(e)).toList()),
+    );
+  }
+
+  // ================= SEARCH =================
+  void searchAlat(String query) {
+    final filtered = alatList.where((e) {
+      final matchesQuery =
+          e.namaAlat.toLowerCase().contains(query.toLowerCase());
+      final matchesKategori = currentFilterKategoriId == null ||
+          currentFilterKategoriId == 0 ||
+          e.kategoriId == currentFilterKategoriId;
+      return matchesQuery && matchesKategori;
+    }).toList();
+
+    filteredAlatList.assignAll(filtered);
+  }
+
+  // ================= FILTER =================
+  void filterByKategori(int kategoriId) {
+    currentFilterKategoriId = kategoriId;
+    _applyFilter();
+  }
+
   // ================= CREATE =================
-Future<bool> createAlat(AlatModel alat, {Uint8List? imageBytes}) async {
-  try {
-    String imageUrl = '';
+  Future<bool> createAlat(AlatModel alat, {Uint8List? imageBytes}) async {
+    try {
+      String imageUrl = '';
+      if (imageBytes != null) {
+        imageUrl = 'data:image/png;base64,${base64Encode(imageBytes)}';
+      }
 
-    if (imageBytes != null) {
-      // Konversi ke base64
-      imageUrl = 'data:image/png;base64,${base64Encode(imageBytes)}';
+      await supabase.from('alat').insert({
+        'nama_alat': alat.namaAlat,
+        'stok': alat.stok,
+        'kategori_id': alat.kategoriId,
+        'image_url': imageUrl,
+        'status': alat.status,
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
+      });
+
+      Get.back();
+      Get.snackbar('Sukses', 'Alat berhasil ditambahkan');
+      return true;
+    } catch (e) {
+      print('Error createAlat: $e');
+      Get.snackbar('Error', 'Gagal menambahkan alat');
+      return false;
     }
-
-    // Simpan ke tabel langsung
-    await supabase.from('alat').insert({
-      'nama_alat': alat.namaAlat,
-      'stok': alat.stok,
-      'kategori_id': alat.kategoriId,
-      'image_url': imageUrl,
-      'created_at': alat.createdAt.toIso8601String(),
-      'updated_at': alat.updatedAt.toIso8601String(),
-    });
-
-    fetchAlat();
-    Get.back();
-    Get.snackbar('Sukses', 'Alat berhasil ditambahkan');
-    return true;
-  } catch (e) {
-    print('Error createAlat: $e');
-    Get.snackbar('Error', 'Gagal menambahkan alat');
-    return false;
   }
-}
 
+  // ================= UPDATE =================
+  Future<void> updateAlat(AlatModel alat, {Uint8List? imageBytes}) async {
+    try {
+      String? imageUrl = alat.imageUrl;
+      if (imageBytes != null) {
+        imageUrl = 'data:image/png;base64,${base64Encode(imageBytes)}';
+      }
 
- Future<void> updateAlat(AlatModel alat, {Uint8List? imageBytes}) async {
-  try {
-    String? imageUrl = alat.imageUrl;
+      await supabase.from('alat').update({
+        'nama_alat': alat.namaAlat,
+        'stok': alat.stok,
+        'kategori_id': alat.kategoriId,
+        'status': alat.status,
+        'image_url': imageUrl,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('alat_id', alat.alatId!);
 
-    if (imageBytes != null) {
-      // konversi ke base64
-      imageUrl = 'data:image/png;base64,${base64Encode(imageBytes)}';
+      Get.back();
+      Get.snackbar('Sukses', 'Alat berhasil diperbarui');
+    } catch (e) {
+      print('Error updateAlat: $e');
+      Get.snackbar('Error', 'Gagal update alat');
     }
-
-    // update ke tabel
-    await supabase.from('alat').update({
-      'nama_alat': alat.namaAlat,
-      'stok': alat.stok,
-      'kategori_id': alat.kategoriId,
-      'status': alat.status,
-      'image_url': imageUrl,
-      'updated_at': DateTime.now().toIso8601String(),
-    }).eq('alat_id', alat.alatId!);
-
-    fetchAlat();
-    Get.back();
-    Get.snackbar('Sukses', 'Alat berhasil diperbarui');
-  } catch (e) {
-    print('Error updateAlat: $e');
-    Get.snackbar('Error', 'Gagal update alat');
   }
-}
-
 
   // ================= DELETE =================
   Future<void> deleteAlat(int alatId) async {
     try {
       await supabase.from('alat').delete().eq('alat_id', alatId);
-      fetchAlat();
       Get.snackbar('Sukses', 'Alat berhasil dihapus');
     } catch (e) {
       print('Error deleteAlat: $e');
       Get.snackbar('Error', 'Gagal menghapus alat');
     }
   }
+
+  // ================= UTILITY =================
+  int get totalSelectedItems =>
+      selectedAlatMap.values.fold(0, (sum, qty) => sum + qty);
 }

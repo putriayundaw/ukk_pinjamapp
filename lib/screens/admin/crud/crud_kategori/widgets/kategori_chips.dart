@@ -5,7 +5,7 @@ class CategoryChip extends StatelessWidget {
   final String label;
   final bool isSelected;
   final bool isAddButton;
-  final VoidCallback onTap; // ini required
+  final VoidCallback onTap;
 
   const CategoryChip({
     super.key,
@@ -18,10 +18,16 @@ class CategoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap, // wajib diisi saat pemanggilan
+      onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(right: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        constraints: const BoxConstraints(
+          minHeight: 44, // 🔥 bikin chip gak gepeng
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 10, // 🔥 tinggi jelas
+        ),
         decoration: BoxDecoration(
           color: isAddButton
               ? Colors.blue
@@ -29,19 +35,19 @@ class CategoryChip extends StatelessWidget {
                   ? AppColors.Blue
                   : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(20),
-          border: isAddButton ? Border.all(color: Colors.blue) : null,
+          border: isAddButton
+              ? Border.all(color: Colors.blue)
+              : Border.all(color: Colors.grey.shade300),
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isAddButton
-                  ? Colors.white
-                  : isSelected
-                      ? Colors.white
-                      : Colors.black87,
-              fontWeight: FontWeight.w600,
-            ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isAddButton || isSelected
+                ? Colors.white
+                : Colors.black87,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
           ),
         ),
       ),

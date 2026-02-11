@@ -1,13 +1,14 @@
+import 'package:aplikasi_pinjam_ukk/controller/alat_controller.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/settings/settings_screen.dart';
 import 'package:aplikasi_pinjam_ukk/screens/peminjam/dashboard/home_peminjam.dart';
 import 'package:aplikasi_pinjam_ukk/screens/peminjam/aktivitas/aktivitas_peminjam.dart';
 import 'package:aplikasi_pinjam_ukk/screens/peminjam/setting/peminjam.dart';
 import 'package:aplikasi_pinjam_ukk/screens/petugas/pengajuan/pengajuan.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class DashboardPeminjam extends StatefulWidget {
-  const DashboardPeminjam({super.key}
-  );
+  const DashboardPeminjam({super.key});
 
   @override
   State<DashboardPeminjam> createState() => _DashboardPeminjamState();
@@ -16,21 +17,26 @@ class DashboardPeminjam extends StatefulWidget {
 class _DashboardPeminjamState extends State<DashboardPeminjam> {
   int _selectedIndex = 0;
 
+  late final AlatController alatController;
   late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
+    alatController = Get.put(AlatController());
     _pages = [
-       HomePeminjam(),
-       AktivitasPeminjam(),
-       PeminjamSetting(),
+      HomePeminjam(),
+      AktivitasPeminjam(),
+      PeminjamSetting(),
     ];
   }
+void _onItemTapped(int index) {
+  setState(() => _selectedIndex = index);
 
-  void _onItemTapped(int index) {
-    setState(() => _selectedIndex = index);
-  }
+  // TIDAK PERLU MEMANGGIL fetchAlat()
+  // Stream realtime akan update otomatis
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +55,7 @@ class _DashboardPeminjamState extends State<DashboardPeminjam> {
               elevation: 0,
             )
           : null,
-
       body: _pages[_selectedIndex],
-
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -61,7 +65,8 @@ class _DashboardPeminjamState extends State<DashboardPeminjam> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           // BottomNavigationBarItem(icon: Icon(Icons.people), label: 'User'),
-          BottomNavigationBarItem(icon: Icon(Icons.inventory_2), label: 'History'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.inventory_2), label: 'History'),
           // BottomNavigationBarItem(
           //     icon: Icon(Icons.article), label: 'Manajemen'),
           BottomNavigationBarItem(

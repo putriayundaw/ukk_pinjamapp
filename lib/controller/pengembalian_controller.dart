@@ -3,81 +3,122 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PengembalianController extends GetxController {
-  final SupabaseClient supabase = Supabase.instance.client;
+  final supabase = Supabase.instance.client;
 
+  var pengembalianList = <PengembalianModel>[].obs;
   var isLoading = false.obs;
-  var pengembalianList = <Pengembalian>[].obs;
 
-  /// Ambil semua pengembalian
+  // ===================== GET DATA =====================
+
   Future<void> fetchPengembalian() async {
     try {
       isLoading.value = true;
+
       final response = await supabase
           .from('pengembalian')
           .select()
           .order('created_at', ascending: false);
 
-      // Supabase v2+ langsung return List
-      if (response != null && response is List) {
-        pengembalianList.value =
-            response.map((e) => Pengembalian.fromJson(e)).toList();
-      }
+      pengembalianList.value = (response as List)
+          .map((e) => PengembalianModel.fromJson(e))
+          .toList();
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Tambah pengembalian baru
-  Future<void> addPengembalian(Pengembalian pengembalian) async {
+  // ===================== CREATE =====================
+
+  Future<bool> createPengembalian({
+    required int peminjamanId,
+    required DateTime tanggalKembaliActual,
+    double denda = 0,
+  }) async {
     try {
       isLoading.value = true;
-      final response = await supabase.from('pengembalian').insert([
-        {
-          'peminjaman_id': pengembalian.peminjamanId,
-          'tanggal_kembali_actual':
-              pengembalian.tanggalKembaliActual?.toIso8601String(),
-          'denda': pengembalian.denda,
-          'status': pengembalian.status,
-          'petugas_id': pengembalian.petugasId,
-        }
-      ]);
 
-      if (response != null && response is List) {
-        final inserted = response.first;
-        pengembalianList.add(Pengembalian.fromJson(inserted));
-      }
+      await supabase.from('pengembalian').insert({
+        'peminjaman_id': peminjamanId,
+        'tanggal_kembali_actual':
+            tanggalKembaliActual.toIso8601String(),
+        'denda': denda,
+        'status': 'menunggu verifikasi',
+      });
+
+      await fetchPengembalian();
+
+      return true;
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+      return false;
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Update pengembalian
-  Future<void> updatePengembalian(int id, Map<String, dynamic> data) async {
+  // ===================== UPDATE STATUS =====================
+
+  Future<bool> updateStatus({
+    required int pengembalianId,
+    required String status,
+    String? petugasId,
+  }) async {
     try {
       isLoading.value = true;
-      final response =
-          await supabase.from('pengembalian').update(data).eq('pengembalian_id', id);
 
-      if (response != null && response is List) {
-        final index =
-            pengembalianList.indexWhere((p) => p.pengembalianId == id);
-        if (index != -1) {
-          pengembalianList[index] = Pengembalian.fromJson(response.first);
-        }
-      }
+      await supabase.from('pengembalian').update({
+        'status': status,
+        'petugas_id': petugasId,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('pengembalian_id', pengembalianId);
+
+      await fetchPengembalian();
+
+      return true;
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+      return false;
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Hapus pengembalian
-  Future<void> deletePengembalian(int id) async {
+  // ===================== GET BY USER =====================
+
+  Future<List<PengembalianModel>> getByPeminjaman(
+      int peminjamanId) async {
     try {
-      isLoading.value = true;
-      await supabase.from('pengembalian').delete().eq('pengembalian_id', id);
-      pengembalianList.removeWhere((p) => p.pengembalianId == id);
-    } finally {
-      isLoading.value = false;
+      final response = await supabase
+          .from('pengembalian')
+          .select()
+          .eq('peminjaman_id', peminjamanId);
+
+      return (response as List)
+          .map((e) => PengembalianModel.fromJson(e))
+          .toList();
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+      return [];
+    }
+  }
+
+  // ===================== DELETE =====================
+
+  Future<bool> deletePengembalian(int id) async {
+    try {
+      await supabase
+          .from('pengembalian')
+          .delete()
+          .eq('pengembalian_id', id);
+
+      await fetchPengembalian();
+
+      return true;
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+      return false;
     }
   }
 }

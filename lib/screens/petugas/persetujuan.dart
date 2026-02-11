@@ -16,7 +16,8 @@ class _PersetujuanPageState extends State<PersetujuanPage> {
   @override
   void initState() {
     super.initState();
-    controller.fetchAllPeminjaman();
+   controller.fetchPeminjaman();
+
   }
 
   @override

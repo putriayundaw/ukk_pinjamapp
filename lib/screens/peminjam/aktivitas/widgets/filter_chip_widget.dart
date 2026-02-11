@@ -2,39 +2,54 @@ import 'package:flutter/material.dart';
 
 class FilterChipWidget extends StatelessWidget {
   final String label;
-  final bool isSelected;
-  final VoidCallback? onSelected;
+  final String selectedFilter;
+  final VoidCallback onSelected;
 
   const FilterChipWidget({
     super.key,
     required this.label,
-    this.isSelected = false,
-    this.onSelected,
+    required this.selectedFilter,
+    required this.onSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    return isSelected
-        ? ElevatedButton(
-            onPressed: onSelected,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF64B5F6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              elevation: 2,
-            ),
-            child: Text(label, style: const TextStyle(color: Colors.white)),
-          )
-        : OutlinedButton(
-            onPressed: onSelected,
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: Colors.grey.shade400),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            child: Text(label, style: const TextStyle(color: Colors.black54)),
-          );
+    final isSelected = selectedFilter == label;
+
+    Color chipColor;
+
+    switch (label) {
+      case 'menunggu persetujuan':
+        chipColor = Colors.orange;
+        break;
+      case 'disetujui':
+        chipColor = Colors.green;
+        break;
+      case 'selesai':
+        chipColor = Colors.blue;
+        break;
+      default:
+        chipColor = Colors.grey;
+    }
+
+    return GestureDetector(
+      onTap: onSelected,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? chipColor : Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
   }
 }

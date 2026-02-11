@@ -1,16 +1,16 @@
 import 'package:aplikasi_pinjam_ukk/controller/alat_controller.dart';
 import 'package:aplikasi_pinjam_ukk/controller/auth_controller.dart';
 import 'package:aplikasi_pinjam_ukk/controller/kategori_controller.dart';
-import 'package:aplikasi_pinjam_ukk/screens/peminjam/transaksi/proses_transaksi.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_kategori/widgets/kategori_chips.dart';
 import 'package:aplikasi_pinjam_ukk/screens/peminjam/dashboard/widgets/tools.dart';
+import 'package:aplikasi_pinjam_ukk/screens/peminjam/proses/peminjaman.dart';
 import 'package:aplikasi_pinjam_ukk/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+
 
 class HomePeminjam extends StatefulWidget {
-  HomePeminjam({super.key});
+  const HomePeminjam({super.key});
 
   @override
   State<HomePeminjam> createState() => _HomePeminjamState();
@@ -19,15 +19,15 @@ class HomePeminjam extends StatefulWidget {
 class _HomePeminjamState extends State<HomePeminjam> {
   final KategoriController kategoriC = Get.put(KategoriController());
   final AlatController alatC = Get.put(AlatController());
+  final AuthController authController = Get.find<AuthController>();
 
   final RxInt selectedKategoriId = 0.obs;
-  final AuthController authController = Get.find<AuthController>();
 
   @override
   void initState() {
     super.initState();
 
-    // Filter alat setiap kali kategori berubah
+    // Filter alat saat kategori berubah
     ever<int>(selectedKategoriId, (kategoriId) {
       alatC.filterByKategori(kategoriId);
     });
@@ -38,7 +38,6 @@ class _HomePeminjamState extends State<HomePeminjam> {
     return Scaffold(
       body: Stack(
         children: [
-          // Konten utama kamu di sini (misalnya ListView, Column, dll)
           SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -54,16 +53,14 @@ class _HomePeminjamState extends State<HomePeminjam> {
               ],
             ),
           ),
-
-          // FloatingActionButton manually positioned
+          // FloatingActionButton bottom
           Positioned(
-            bottom: 16,  // Jarak dari bawah layar
-            left: 16,    // Jarak dari kiri layar
-            right: 16,   // Jarak dari kanan layar
+            bottom: 16,
+            left: 16,
+            right: 16,
             child: Obx(() {
               final jumlahDipilih = alatC.totalSelectedItems;
-
-              if (jumlahDipilih == 0) return const SizedBox(); // sembunyikan jika 0
+              if (jumlahDipilih == 0) return const SizedBox();
 
               return Material(
                 elevation: 6,
@@ -78,14 +75,10 @@ class _HomePeminjamState extends State<HomePeminjam> {
                       Obx(() => Text(
                             '${alatC.totalSelectedItems} Items',
                             style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Colors.black87,
-                            ),
+                                fontWeight: FontWeight.bold, fontSize: 16),
                           )),
                       ElevatedButton(
                         onPressed: () {
-                      
                           Get.to(() => const ProsesTransaksi());
                         },
                         style: ElevatedButton.styleFrom(
@@ -93,11 +86,13 @@ class _HomePeminjamState extends State<HomePeminjam> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                         ),
                         child: const Text(
                           'Proses',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -114,45 +109,29 @@ class _HomePeminjamState extends State<HomePeminjam> {
   Widget _buildUserInfo() {
     return Row(
       children: [
-        // Mengambil huruf pertama dari email untuk menjadi inisial
         CircleAvatar(
           radius: 28,
-          backgroundColor: Colors.blue,  // Warna background avatar
+          backgroundColor: Colors.blue,
           child: Obx(() {
-            // Ambil email dari controller
             final email = authController.emailUser.value;
-
-            // Ambil huruf pertama dari bagian nama email (sebelum @)
-            final initials = email.isNotEmpty ? email.split('@')[0][0].toUpperCase() : ''; 
-
-            return Text(
-              initials, 
-              style: TextStyle(
-                color: Colors.white,  // Warna teks avatar
-                fontWeight: FontWeight.bold,
-                fontSize: 20,  // Ukuran font inisial
-              ),
-            );
+            final initials =
+                email.isNotEmpty ? email.split('@')[0][0].toUpperCase() : '';
+            return Text(initials,
+                style:
+                    const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20));
           }),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Selamat Datang',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
-            ),
+            const Text('Selamat Datang',
+                style: TextStyle(color: Colors.grey, fontSize: 14)),
             Obx(() {
-              final email = authController.emailUser.value;  // Mengambil email dari controller
-              return Text(
-                email,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              );
+              final email = authController.emailUser.value;
+              return Text(email,
+                  style: const TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16));
             }),
           ],
         ),
@@ -175,15 +154,7 @@ class _HomePeminjamState extends State<HomePeminjam> {
         contentPadding: const EdgeInsets.symmetric(vertical: 10),
       ),
       onChanged: (query) {
-        final filtered = alatC.alatList.where((e) {
-          final matchesQuery =
-              e.namaAlat.toLowerCase().contains(query.toLowerCase());
-          final matchesKategori =
-              selectedKategoriId.value == 0 || e.kategoriId == selectedKategoriId.value;
-          return matchesQuery && matchesKategori;
-        }).toList();
-
-        alatC.filteredAlatList.assignAll(filtered);
+        alatC.searchAlat(query);
       },
     );
   }
@@ -225,8 +196,17 @@ class _HomePeminjamState extends State<HomePeminjam> {
       }
 
       if (alatC.filteredAlatList.isEmpty) {
-        return const Text('⚠️ Tidak ada alat tersedia',
-            style: TextStyle(color: Colors.grey));
+        return Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Icon(Icons.inventory_2_outlined, size: 72, color: Colors.grey),
+              SizedBox(height: 12),
+              Text('Tidak ada alat tersedia',
+                  style: TextStyle(color: Colors.grey, fontSize: 14)),
+            ],
+          ),
+        );
       }
 
       return GridView.builder(
@@ -244,7 +224,7 @@ class _HomePeminjamState extends State<HomePeminjam> {
           return ToolCard(
             alat: alat,
             alatC: alatC,
-            imageUrl: alat.imageUrl!,
+            imageUrl: alat.imageUrl ?? '',
             title: alat.namaAlat,
           );
         },

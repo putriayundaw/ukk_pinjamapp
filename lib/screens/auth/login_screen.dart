@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Obx(() => CustomInputField(
                   controller: _emailController,
                   label: 'Email address',
-                  hintText: 'EMAIL',
+                  hintText: 'email',
                   errorText: authController.emailError.value,
                   showError: authController.emailError.value.isNotEmpty,
                   enabled: !authController.isLoading.value,
@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Obx(() => CustomInputField(
                   controller: _passwordController,
                   label: 'Password',
-                  hintText: 'PASSWORD',
+                  hintText: 'password',
                   obscureText: _obscurePassword,
                   errorText: authController.passwordError.value,
                   showError: authController.passwordError.value.isNotEmpty,
@@ -123,47 +123,79 @@ class _LoginScreenState extends State<LoginScreen> {
               
               const SizedBox(height: Sizes.xxl),
               
-              // Login Button
-              Obx(() {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: authController.isLoading.value ? null : _login,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.Blue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: authController.isLoading.value
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : const Text(
-                            'Masuk',
-                            style: TextStyle(
-                              color: AppColors.White,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                    ),
+               // Tombol login biasa kamu (tidak diubah)
+    Obx(() {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: ElevatedButton(
+            onPressed: authController.isLoading.value ? null : _login,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.Blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: authController.isLoading.value
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
-                );
-              }),
-              
-              const SizedBox(height: Sizes.xxl),
-            ],
+                )
+              : const Text(
+                  'Masuk',
+                  style: TextStyle(
+                    color: AppColors.White,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
           ),
+        ),
+      );
+    }),
+
+    const SizedBox(height: 10),
+
+    // ===== TOMBOL LOGIN GOOGLE =====
+    Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: SizedBox(
+        width: double.infinity,
+        height: 50,
+        child: ElevatedButton(
+  onPressed: () {
+    authController.loginWithGoogle();
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.red,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+  ),
+  child: const Text(
+    "Login dengan Google",
+    style: TextStyle(
+      color: Colors.white,
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+    ),
+  ),
+),
+
+      ),
+    ),
+
+  ],
+)
+              
+       
         ),
       ),
     );

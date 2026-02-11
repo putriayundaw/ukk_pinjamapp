@@ -39,6 +39,7 @@ Future<void> main() async {
 
     // Inisialisasi format tanggal dan waktu untuk locale Indonesia
     await initializeDateFormatting('id_ID', null);
+    
 
     // Inisialisasi controller
     Get.put(AuthController());

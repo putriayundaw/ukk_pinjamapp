@@ -20,7 +20,8 @@ class _PemantauPageState extends State<PemantauPage> {
   @override
   void initState() {
     super.initState();
-    controller.fetchAllPeminjaman();
+   controller.fetchPeminjaman();
+();
   }
 
   @override

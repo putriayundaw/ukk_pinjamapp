@@ -139,25 +139,21 @@ class AlatScreen extends StatelessWidget {
         return const Center(child: Text('Alat tidak ditemukan.'));
       }
 
-      return RefreshIndicator(
-        onRefresh: () async => await alatC.fetchAlat(),
-        child: GridView.builder(
-          padding: const EdgeInsets.only(bottom: 80),
-          itemCount: filteredList.length,
-          gridDelegate:
-              const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.68,
-          ),
-          itemBuilder: (context, index) {
-            final alat = filteredList[index];
-            return _alatCard(alat,
-                key: ValueKey(alat.alatId ?? index));
-          },
-        ),
-      );
+    return GridView.builder(
+  padding: const EdgeInsets.only(bottom: 80),
+  itemCount: filteredList.length,
+  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    crossAxisSpacing: 16,
+    mainAxisSpacing: 16,
+    childAspectRatio: 0.68,
+  ),
+  itemBuilder: (context, index) {
+    final alat = filteredList[index];
+    return _alatCard(alat, key: ValueKey(alat.alatId ?? index));
+  },
+);
+
     });
   }
 

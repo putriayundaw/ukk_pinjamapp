@@ -3,7 +3,7 @@ import 'package:aplikasi_pinjam_ukk/controller/auth_controller.dart';
 import 'package:aplikasi_pinjam_ukk/controller/peminjaman_controller.dart';
 import 'package:aplikasi_pinjam_ukk/screens/admin/crud/crud_alat/models/alat_models.dart';
 import 'package:aplikasi_pinjam_ukk/screens/peminjam/dashboard/dashboard_peminjam.dart';
-import 'package:aplikasi_pinjam_ukk/screens/peminjam/transaksi/widgets/persetujuan_dialog.dart';
+import 'package:aplikasi_pinjam_ukk/screens/peminjam/proses/widgets/persetujuan_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';

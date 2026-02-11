@@ -14,13 +14,40 @@ class PeminjamanController extends GetxController {
     super.onInit();
   }
 
+  /// ===============================
+  /// CEK APAKAH USER MASIH MEMILIKI PEMINJAMAN AKTIF
+  /// ===============================
+  Future<bool> hasActivePeminjaman(String userId) async {
+  try {
+    final response = await supabase
+        .from('peminjaman')
+        .select()
+        .eq('user_id', userId)
+        .filter('status', 'in', ['menunggu persetujuan', 'disetujui']);
+
+    return (response as List).isNotEmpty;
+  } catch (e) {
+    Get.snackbar('Error', 'Gagal cek peminjaman aktif: $e');
+    return true; // Default true supaya aman
+  }
+}
+
+
+  /// ===============================
+  /// AMBIL SEMUA PEMINJAMAN (ADMIN)
+  /// ===============================
   Future<void> fetchPeminjaman() async {
     try {
       isLoading.value = true;
 
       final response = await supabase
           .from('peminjaman')
-          .select()
+          .select('''
+            *,
+            alat!fk_alat(nama_alat),
+            peminjam:users!peminjaman_user_id_fkey(email, nama),
+            petugas:users!fk_petugas_peminjaman(nama)
+          ''')
           .order('peminjaman_id', ascending: false);
 
       peminjamanList.value =
@@ -32,34 +59,32 @@ class PeminjamanController extends GetxController {
     }
   }
 
-  /// HAPUS + LOG AKTIVITAS
-  Future<void> deletePeminjaman(int id) async {
+  /// ===============================
+  /// AMBIL PEMINJAMAN USER LOGIN
+  /// ===============================
+  Future<void> fetchUserPeminjaman() async {
     try {
       isLoading.value = true;
 
       final user = supabase.auth.currentUser;
+      if (user == null) {
+        Get.snackbar('Error', 'User tidak ditemukan');
+        return;
+      }
 
-      // hapus detail dulu (biar tidak kena foreign key)
-      await supabase
-          .from('detail_peminjaman')
-          .delete()
-          .eq('peminjaman_id', id);
-
-      // hapus peminjaman
-      await supabase
+      final response = await supabase
           .from('peminjaman')
-          .delete()
-          .eq('peminjaman_id', id);
+          .select('''
+            *,
+            alat!fk_alat(nama_alat),
+            peminjam:users!peminjaman_user_id_fkey(email),
+            petugas:users!fk_petugas_peminjaman(nama)
+          ''')
+          .eq('user_id', user.id)
+          .order('peminjaman_id', ascending: false);
 
-      // log aktivitas
-      await supabase.from('log_aktivitas').insert({
-        'id_user': user?.id,
-        'aktivitas': 'Menghapus data peminjaman ID $id',
-        'waktu': DateTime.now().toIso8601String(),
-      });
-
-      fetchPeminjaman();
-      Get.snackbar('Sukses', 'Data berhasil dihapus');
+      peminjamanList.value =
+          (response as List).map((e) => PeminjamanModel.fromJson(e)).toList();
     } catch (e) {
       Get.snackbar('Error', e.toString());
     } finally {
@@ -67,6 +92,36 @@ class PeminjamanController extends GetxController {
     }
   }
 
+  /// ===============================
+  /// AMBIL PEMINJAMAN MENUNGGU
+  /// ===============================
+  Future<void> fetchPendingPeminjaman() async {
+    try {
+      isLoading.value = true;
+
+      final response = await supabase
+          .from('peminjaman')
+          .select('''
+            *,
+            alat!fk_alat(nama_alat),
+            peminjam:users!peminjaman_user_id_fkey(email, nama),
+            petugas:users!fk_petugas_peminjaman(nama)
+          ''')
+          .eq('status', 'menunggu persetujuan')
+          .order('peminjaman_id', ascending: false);
+
+      peminjamanList.value =
+          (response as List).map((e) => PeminjamanModel.fromJson(e)).toList();
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// ===============================
+  /// CREATE PEMINJAMAN
+  /// ===============================
   Future<bool> createPeminjaman({
     required String userId,
     required DateTime tanggalPinjam,
@@ -76,8 +131,23 @@ class PeminjamanController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Insert satu peminjaman untuk setiap alat yang dipilih
+      // ===============================
+      // CEK PEMINJAMAN AKTIF
+      // ===============================
+      bool hasActive = await hasActivePeminjaman(userId);
+      if (hasActive) {
+        Get.snackbar(
+          'Gagal',
+          'Anda masih memiliki peminjaman yang belum dikembalikan!',
+        );
+        return false;
+      }
+
+      // ===============================
+      // PROSES PEMBUATAN PEMINJAMAN
+      // ===============================
       List<Map<String, dynamic>> peminjamanData = [];
+
       selectedAlat.forEach((alatId, qty) {
         peminjamanData.add({
           'alat_id': alatId,
@@ -92,14 +162,13 @@ class PeminjamanController extends GetxController {
 
       await supabase.from('peminjaman').insert(peminjamanData);
 
-      // Log aktivitas
       await supabase.from('log_aktivitas').insert({
         'id_user': userId,
         'aktivitas': 'Membuat ${selectedAlat.length} peminjaman alat',
         'waktu': DateTime.now().toIso8601String(),
       });
 
-      fetchPeminjaman();
+      fetchUserPeminjaman();
       return true;
     } catch (e) {
       Get.snackbar('Error', 'Gagal membuat peminjaman: $e');
@@ -109,66 +178,20 @@ class PeminjamanController extends GetxController {
     }
   }
 
-  Future<void> fetchUserPeminjaman() async {
-    try {
-      isLoading.value = true;
-
-      final user = supabase.auth.currentUser;
-      if (user == null) {
-        Get.snackbar('Error', 'User tidak ditemukan');
-        return;
-      }
-
-      final response = await supabase
-          .from('peminjaman')
-          .select('*, alat!fk_alat(nama_alat), users!fk_peminjaman_user_id_fkey(email), petugas!fk_peminjaman_petugas_id_fkey(nama)')
-          .eq('user_id', user.id)
-          .order('peminjaman_id', ascending: false);
-
-      peminjamanList.value =
-          (response as List).map((e) => PeminjamanModel.fromJson(e)).toList();
-    } catch (e) {
-      Get.snackbar('Error', e.toString());
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> fetchPendingPeminjaman() async {
-    try {
-      isLoading.value = true;
-
-      final response = await supabase
-          .from('peminjaman')
-          .select('*, alat!fk_alat(nama_alat), users!fk_peminjaman_user_id_fkey(email, nama), petugas!fk_peminjaman_petugas_id_fkey(nama)')
-          .eq('status', 'menunggu persetujuan')
-          .order('peminjaman_id', ascending: false);
-
-      peminjamanList.value =
-          (response as List).map((e) => PeminjamanModel.fromJson(e)).toList();
-    } catch (e) {
-      Get.snackbar('Error', e.toString());
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
+  /// ===============================
+  /// SETUJUI PEMINJAMAN
+  /// ===============================
   Future<void> approvePeminjaman(int id) async {
     try {
       isLoading.value = true;
-
       final user = supabase.auth.currentUser;
 
-      await supabase
-          .from('peminjaman')
-          .update({
-            'status': 'disetujui',
-            'petugas_id': user?.id,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('peminjaman_id', id);
+      await supabase.from('peminjaman').update({
+        'status': 'disetujui',
+        'petugas_id': user?.id,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('peminjaman_id', id);
 
-      // log aktivitas
       await supabase.from('log_aktivitas').insert({
         'id_user': user?.id,
         'aktivitas': 'Menyetujui peminjaman ID $id',
@@ -184,22 +207,20 @@ class PeminjamanController extends GetxController {
     }
   }
 
+  /// ===============================
+  /// TOLAK PEMINJAMAN
+  /// ===============================
   Future<void> rejectPeminjaman(int id) async {
     try {
       isLoading.value = true;
-
       final user = supabase.auth.currentUser;
 
-      await supabase
-          .from('peminjaman')
-          .update({
-            'status': 'ditolak',
-            'petugas_id': user?.id,
-            'updated_at': DateTime.now().toIso8601String(),
-          })
-          .eq('peminjaman_id', id);
+      await supabase.from('peminjaman').update({
+        'status': 'ditolak',
+        'petugas_id': user?.id,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('peminjaman_id', id);
 
-      // log aktivitas
       await supabase.from('log_aktivitas').insert({
         'id_user': user?.id,
         'aktivitas': 'Menolak peminjaman ID $id',
@@ -215,17 +236,32 @@ class PeminjamanController extends GetxController {
     }
   }
 
-  Future<void> fetchAllPeminjaman() async {
+  /// ===============================
+  /// HAPUS PEMINJAMAN
+  /// ===============================
+  Future<void> deletePeminjaman(int id) async {
     try {
       isLoading.value = true;
+      final user = supabase.auth.currentUser;
 
-      final response = await supabase
+      await supabase
+          .from('detail_peminjaman')
+          .delete()
+          .eq('peminjaman_id', id);
+
+      await supabase
           .from('peminjaman')
-          .select('*, alat!fk_alat(nama_alat), users!fk_peminjaman_user_id_fkey(email, nama), petugas!fk_peminjaman_petugas_id_fkey(nama)')
-          .order('peminjaman_id', ascending: false);
+          .delete()
+          .eq('peminjaman_id', id);
 
-      peminjamanList.value =
-          (response as List).map((e) => PeminjamanModel.fromJson(e)).toList();
+      await supabase.from('log_aktivitas').insert({
+        'id_user': user?.id,
+        'aktivitas': 'Menghapus data peminjaman ID $id',
+        'waktu': DateTime.now().toIso8601String(),
+      });
+
+      fetchPeminjaman();
+      Get.snackbar('Sukses', 'Data berhasil dihapus');
     } catch (e) {
       Get.snackbar('Error', e.toString());
     } finally {
